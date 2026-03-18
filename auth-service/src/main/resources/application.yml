@@ -1,6 +1,26 @@
 server:
   port: 12321
 
+spring:
+  application:
+    name: auth-service
+
+  profiles:
+    default: local
+
+  h2:
+    console:
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      show-details: always
+
 jwt:
   access:
     secret: asdfasdfasdfasdfasdfasdfsadfasdfasdfasdfasdfasdfsadf
@@ -8,3 +28,7 @@ jwt:
   refresh:
     secret: asdfasdfasdfasdfasdfasdfsadfasdfasdfasdfasdfasdfsadf
     expires: 10000000
+
+logging:
+  level:
+    root: DEBUG

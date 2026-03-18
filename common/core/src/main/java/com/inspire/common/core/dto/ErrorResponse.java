@@ -21,25 +21,29 @@ public class ErrorResponse {
     /**
      *
      */
-    private List<String> messages;
+    private List<ValidException> details;
 
     /**
      *
      * @param code
      * @param message
      */
-    private ErrorResponse(String code, String message, List<String> messages) {
+    private ErrorResponse(String code, String message, List<ValidException> details) {
         this.code = code;
         this.message = message;
-        this.messages = messages;
+        this.details = details;
+    }
+
+    public static ErrorResponse of(String code, String message, List<ValidException> details) {
+        return new ErrorResponse(code, message, details);
     }
 
     public static ErrorResponse of(String code, String message) {
         return new ErrorResponse(code, message, null);
     }
 
-    public static ErrorResponse of(String code, List<String> messages) {
-        return new ErrorResponse(code, null, messages);
+    public static ErrorResponse of(String code, List<ValidException> details) {
+        return new ErrorResponse(code, null, details);
     }
 
     /**
@@ -58,7 +62,7 @@ public class ErrorResponse {
         return this.message;
     }
 
-    public List<String> getMessages() {
-        return this.messages;
+    public List<ValidException> getDetails() {
+        return this.details;
     }
 }

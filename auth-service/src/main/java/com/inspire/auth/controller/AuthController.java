@@ -1,19 +1,35 @@
 package com.inspire.auth.controller;
 
-import com.inspire.auth.dto.TestDTO;
+import com.inspire.auth.domain.dto.TestDTO;
 import com.inspire.auth.exception.AuthErrorCode;
 import com.inspire.auth.exception.AuthException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "auth", description = "임시")
 public class AuthController {
 
+    @Operation(summary = "임시 요약")
+    @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(type = "string", example = "hi")))
     @GetMapping("/test")
     public String test() {
         return "test";
@@ -24,12 +40,16 @@ public class AuthController {
         throw new AuthException(AuthErrorCode.TEST);
     }
 
+    @Operation(summary = "응응")
+    @ApiResponse(responseCode = "204", description = "성공")
     @GetMapping("/test2")
-    public String test2(@Valid @ModelAttribute TestDTO testDTO) {
-        return "test2";
+    public ResponseEntity<Void> test2(@Valid @ModelAttribute TestDTO testDTO) {
+        return ResponseEntity.noContent().build();
     }
 
-    public ResponseEntity<Void> test3() {
-        return null;
+    @GetMapping("/test3")
+    @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = TestDTO.class)))
+    public ResponseEntity<List<TestDTO>> test3(@Valid @ModelAttribute TestDTO testDTO) {
+        return ResponseEntity.status(208).body(List.of(new TestDTO("hi"), new TestDTO("bye")));
     }
 }
