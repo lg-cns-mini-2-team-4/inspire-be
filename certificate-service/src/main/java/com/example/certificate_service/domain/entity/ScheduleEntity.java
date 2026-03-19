@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class Schedule {
+public class ScheduleEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,7 +19,7 @@ public class Schedule {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_code")
-    private Certificate certificate; // 종목 정보 (FK 연관관계)
+    private CertificateEntity certificate; // 종목 정보 (FK 연관관계)
 
     @Column(name = "impl_year")
     private String implYear; // 시행년도

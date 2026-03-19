@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class Certificate {
+public class CertificateEntity {
 
     @Id
     @Column(name = "item_code")
