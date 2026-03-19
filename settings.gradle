@@ -2,6 +2,7 @@ rootProject.name = 'inspire-be'
 
 include 'auth-service'
 include 'user-service'
+include 'personal_event'
 include 'common:cookie'
 include 'common:jwt'
 include 'common:contract'
