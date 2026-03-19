@@ -7,11 +7,13 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springdoc.core.configuration.SpringDocConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 @Configuration(proxyBeanMethods = false)
 public class SwaggerConfig {
 
     @Bean
+    @Profile("!prod")
     public OpenAPI customOpenAPI() {
         Components components = new Components()
                 .addSecuritySchemes("bearerAuth",

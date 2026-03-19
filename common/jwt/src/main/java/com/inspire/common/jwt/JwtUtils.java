@@ -377,7 +377,22 @@ public class JwtUtils {
      * @return the expiration time of access tokens in seconds.
      */
     public Long getAccessExpiresInSeconds() {
-        return accessExpires / 1000;
+        return this.accessExpires / 1000;
+    }
+
+    /**
+     * Returns the configured expiration time of refresh tokens in seconds.
+     *
+     * <hr>
+     * <p>
+     * 설정된 refresh token의 만료 기한을 초 단위로 반환합니다.
+     *
+     * <hr>
+     *
+     * @return the expiration time of refresh tokens in seconds.
+     */
+    public Long getRefreshExpiresInSeconds() {
+        return this.refreshExpires / 1000;
     }
 
     /**

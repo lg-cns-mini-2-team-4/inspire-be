@@ -1,0 +1,46 @@
+package com.inspire.auth.service;
+
+import com.inspire.auth.domain.enums.TokenType;
+import com.inspire.auth.domain.vo.OAuth2UserVO;
+import com.inspire.auth.exception.AuthErrorCode;
+import com.inspire.auth.exception.AuthException;
+import com.inspire.auth.infrastructure.store.RedisTokenStore;
+import com.inspire.common.cookie.servlet.CookieUtils;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.time.Duration;
+import java.util.UUID;
+
+@Service
+public class OneTimeTokenService {
+
+    private final RedisTokenStore<OAuth2UserVO> oneTimeTokenStore;
+    private final CookieUtils cookieUtils;
+    private final String domain;
+    private final long onetimeExpiresInSeconds;
+    private static final String COOKIE_NAME = "inspire_onetime";
+
+    public OneTimeTokenService(@Qualifier("oneTimeTokenStore") RedisTokenStore<OAuth2UserVO> oneTimeTokenStore,
+                               CookieUtils cookieUtils,
+                               @Value("${cookie.domain:#{null}}") String domain) {
+        this.oneTimeTokenStore = oneTimeTokenStore;
+        this.cookieUtils = cookieUtils;
+        this.domain = domain;
+        this.onetimeExpiresInSeconds = 300;
+    }
+
+    public void saveOneTimeTokenAndAddCookie(HttpServletResponse response, OAuth2UserVO oAuth2UserVO) {
+        String token = generateOneTimeToken();
+        oneTimeTokenStore.save(token, oAuth2UserVO, Duration.ofSeconds(onetimeExpiresInSeconds));
+        cookieUtils.addCookie(response, COOKIE_NAME, token, domain, "/", (int) onetimeExpiresInSeconds, true);
+    }
+
+    private String generateOneTimeToken() {
+        return UUID.randomUUID().toString();
+    }
+
+}

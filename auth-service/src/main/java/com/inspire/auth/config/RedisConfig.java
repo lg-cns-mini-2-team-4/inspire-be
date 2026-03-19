@@ -1,20 +1,23 @@
 package com.inspire.auth.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.inspire.auth.domain.vo.OAuth2UserVO;
+import com.inspire.auth.security.handler.OAuth2AuthenticationSuccessHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-/*
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-*/
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 
 @Configuration
 public class RedisConfig {
-/*
+
     private final String host;
     private final int port;
     private final String password;
@@ -37,13 +40,16 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, String> stringRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
-        RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
+    public RedisTemplate<String, OAuth2UserVO> oAuth2RedisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, OAuth2UserVO> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
         redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(OAuth2UserVO.class));
 
+        ObjectMapper objectMapper = new ObjectMapper();
+        Jackson2JsonRedisSerializer<OAuth2AuthorizationRequest> serializer =
+                new Jackson2JsonRedisSerializer<>(objectMapper, OAuth2AuthorizationRequest.class);
         return redisTemplate;
     }
-*/
+
 }

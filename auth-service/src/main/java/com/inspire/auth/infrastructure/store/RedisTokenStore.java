@@ -3,8 +3,12 @@ package com.inspire.auth.infrastructure.store;
 import com.inspire.auth.domain.enums.TokenType;
 
 import java.time.Duration;
+import java.util.Optional;
 
-public interface RedisTokenStore {
-    void save(TokenType tokenType, String token, String payload, Duration ttl);
-    void delete(TokenType tokenType, String token);
+public interface RedisTokenStore<T> {
+    void save(String key, T payload, Duration ttl);
+    void delete(String key);
+    boolean exists(String key);
+    Optional<T> get(String key);
+    Optional<T> getAndDelete(String key);
 }
