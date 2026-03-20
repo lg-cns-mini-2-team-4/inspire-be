@@ -1,6 +1,6 @@
 package com.inspire.auth.infrastructure.entity;
 
-import com.inspire.auth.infrastructure.enums.OAuth2Provider;
+import com.inspire.auth.infrastructure.enums.Provider;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -27,18 +27,18 @@ public class UserCredentials extends BaseEntity {
 
     @Column(name = "provider", nullable = false)
     @Enumerated(value = EnumType.STRING)
-    private OAuth2Provider provider;
+    private Provider provider;
 
     @Column(name = "external_id")
     private String externalId;
 
 
     @Builder
-    public UserCredentials(Long userId, String email, String passwordHash, OAuth2Provider provider, String externalId) {
+    public UserCredentials(Long userId, String email, String passwordHash, Provider provider, String externalId) {
         Assert.notNull(provider, "provider must not be null.");
         Assert.isTrue(
-                (provider == OAuth2Provider.INSPIRE && externalId == null) ||
-                        (provider != OAuth2Provider.INSPIRE && externalId != null),
+                (provider == Provider.INSPIRE && externalId == null) ||
+                        (provider != Provider.INSPIRE && externalId != null),
                 "externalId must be null for INSPIRE, and non-null otherwise."
         );
         this.userId = userId;

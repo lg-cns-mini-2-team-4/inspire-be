@@ -11,7 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Schema(description = "토큰 응답 데이터 (Access Token 및 만료 시간)")
-public class AccessTokenDTO {
+public class TokenResponse {
 
     @Schema(description = "Access Token (Bearer)",
             example = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYWtiaW4xMjMifQ...")

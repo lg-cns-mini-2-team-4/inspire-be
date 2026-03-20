@@ -36,6 +36,7 @@ import org.springframework.web.server.ServerWebExchange;
 @Getter
 public class CookieUtils {
 
+    private final String defaultDomain;
     /**
      * Default Secure flag. <hr>
      * <p>
@@ -61,11 +62,12 @@ public class CookieUtils {
      * @param defaultSecure   whether cookie should be secure by default
      * @param defaultSameSite the same-site policy cookies should follow by default
      */
-    public CookieUtils(Boolean defaultSecure, String defaultSameSite) {
+    public CookieUtils(String defaultDomain, Boolean defaultSecure, String defaultSameSite) {
+        this.defaultDomain = defaultDomain;
         this.defaultSecure = defaultSecure;
         this.defaultSameSite = defaultSameSite;
 
-        log.debug("CookieUtils initialized with (secure: {}, sameSite: {})", defaultSecure, defaultSameSite);
+        log.debug("CookieUtils initialized with (domain: {}, secure: {}, sameSite: {})", defaultDomain, defaultSecure, defaultSameSite);
     }
 
     /**
@@ -86,10 +88,10 @@ public class CookieUtils {
      *
      * @param cookieProperties the cookie configuration properties
      * @see CookieProperties
-     * @see #CookieUtils(Boolean, String)
+     * @see #CookieUtils(String, Boolean, String)
      */
     public CookieUtils(CookieProperties cookieProperties) {
-        this(cookieProperties.getSecure(), cookieProperties.getSameSite());
+        this(cookieProperties.getDomain(), cookieProperties.getSecure(), cookieProperties.getSameSite());
     }
 
     /**
@@ -183,15 +185,14 @@ public class CookieUtils {
      * @param exchange the server web exchange
      * @param name     the name of the cookie
      * @param value    the value of the cookie
-     * @param domain   the domain of the cookie
      * @param path     the path of the cookie
      * @param maxAge   the maximum age in seconds
      * @param httpOnly whether the cookie is HTTP-only
      * @throws IllegalArgumentException if {@code name} is null or {@code sameSite} is invalid
      * @see CookieAttributes#CookieAttributes(String, String, Integer, String, String, Boolean, Boolean, String)
      */
-    public void addCookie(ServerWebExchange exchange, String name, String value, String domain, String path, Integer maxAge, Boolean httpOnly) {
-        addCookie(exchange, name, value, domain, path, maxAge, httpOnly, defaultSecure, defaultSameSite);
+    public void addCookie(ServerWebExchange exchange, String name, String value, String path, Integer maxAge, Boolean httpOnly) {
+        addCookie(exchange, name, value, defaultDomain, path, maxAge, httpOnly, defaultSecure, defaultSameSite);
     }
 
 

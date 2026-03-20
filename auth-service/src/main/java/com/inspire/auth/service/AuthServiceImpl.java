@@ -1,11 +1,8 @@
 package com.inspire.auth.service;
 
-import com.inspire.auth.domain.dto.LoginRequest;
-import com.inspire.auth.domain.dto.LoginResponse;
-import com.inspire.auth.domain.dto.SignupRequest;
-import com.inspire.auth.domain.dto.response.AccessTokenDTO;
-import com.inspire.auth.domain.dto.result.ReissueTokenResult;
-import com.inspire.auth.domain.enums.TokenType;
+import com.inspire.auth.domain.dto.request.LoginRequest;
+import com.inspire.auth.domain.dto.response.SignupRequest;
+import com.inspire.auth.domain.dto.result.TokenResult;
 import com.inspire.auth.exception.AuthErrorCode;
 import com.inspire.auth.exception.AuthException;
 import com.inspire.auth.infrastructure.client.UserClient;
@@ -14,7 +11,6 @@ import com.inspire.auth.infrastructure.entity.UserCredentials;
 import com.inspire.auth.infrastructure.enums.Provider;
 import com.inspire.auth.infrastructure.repository.UserCredentialsRepository;
 import com.inspire.auth.infrastructure.store.RedisStore;
-import com.inspire.auth.infrastructure.store.RefreshTokenStore;
 import com.inspire.common.jwt.JwtUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -59,7 +55,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional(readOnly = true)
-    public LoginResponse login(LoginRequest request) {
+    public TokenResult login(LoginRequest request) {
         UserCredentials user = userCredentialsRepository.findByEmailAndProvider(request.getEmail(), Provider.INSPIRE)
                 .orElseThrow(() -> new AuthException(AuthErrorCode.USER_NOT_FOUND));
 
@@ -73,11 +69,11 @@ public class AuthServiceImpl implements AuthService {
         // Default TTL for refresh token to 14 days
         redisStore.save(user.getUserId(), refreshToken, Duration.ofSeconds(jwtUtils.getRefreshExpiresInSeconds()));
 
-        return new LoginResponse(user.getUserId(), accessToken, refreshToken);
+        return new TokenResult(accessToken, refreshToken);
     }
 
     @Override
-    public ReissueTokenResult reissue(String refreshToken) {
+    public TokenResult reissue(String refreshToken) {
         // jwt 자체가 만료, 위조되면 JwtValidationException 발생
         Long userId = jwtUtils.getUserIdFromRefreshToken(refreshToken);
 
@@ -95,7 +91,7 @@ public class AuthServiceImpl implements AuthService {
 
         redisStore.save(userId, newRefreshToken, Duration.ofSeconds(jwtUtils.getRefreshExpiresInSeconds()));
 
-        return new ReissueTokenResult(accessToken, newRefreshToken);
+        return new TokenResult(accessToken, newRefreshToken);
     }
 
     @Override

@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
  * Supports both direct cookie attributes and the {@link CookieAttributes}.
  *
  * <hr>
- *
+ * <p>
  * 서블릿 기반 애플리케이션에서 HTTP 쿠키를 관리하기 위한 유틸리티 클래스.
  *
  * <p>
@@ -52,6 +52,8 @@ public class CookieUtils {
      */
     private final String defaultSameSite;
 
+    private final String defaultDomain;
+
     /**
      * Constructs a new {@code CookieUtils} instance with the provided default security and same-site settings.
      *
@@ -64,11 +66,12 @@ public class CookieUtils {
      * @param defaultSecure   whether cookie should be secure by default
      * @param defaultSameSite the same-site policy cookies should follow by default
      */
-    public CookieUtils(Boolean defaultSecure, String defaultSameSite) {
+    public CookieUtils(String defaultDomain, Boolean defaultSecure, String defaultSameSite) {
+        this.defaultDomain = defaultDomain;
         this.defaultSecure = defaultSecure;
         this.defaultSameSite = defaultSameSite;
 
-        log.debug("CookieUtils initialized with (secure: {}, sameSite: {})", defaultSecure, defaultSameSite);
+        log.debug("CookieUtils initialized with (domain: {}, secure: {}, sameSite: {})", defaultDomain, defaultSecure, defaultSameSite);
     }
 
     /**
@@ -89,10 +92,10 @@ public class CookieUtils {
      *
      * @param cookieProperties the cookie configuration properties
      * @see CookieProperties
-     * @see #CookieUtils(Boolean, String)
+     * @see #CookieUtils(String, Boolean, String)
      */
     public CookieUtils(CookieProperties cookieProperties) {
-        this(cookieProperties.getSecure(), cookieProperties.getSameSite());
+        this(cookieProperties.getDomain(), cookieProperties.getSecure(), cookieProperties.getSameSite());
     }
 
     /**
@@ -187,15 +190,14 @@ public class CookieUtils {
      * @param response the HTTP servlet response
      * @param name     the name of the cookie
      * @param value    the value of the cookie
-     * @param domain   the domain of the cookie
      * @param path     the path of the cookie
      * @param maxAge   the maximum age in seconds
      * @param httpOnly whether the cookie is HTTP-only
      * @throws IllegalArgumentException if {@code name} is null or {@code sameSite} is invalid
      * @see CookieAttributes#CookieAttributes(String, String, Integer, String, String, Boolean, Boolean, String)
      */
-    public void addCookie(HttpServletResponse response, String name, String value, String domain, String path, Integer maxAge, Boolean httpOnly) {
-        addCookie(response, name, value, domain, path, maxAge, httpOnly, defaultSecure, defaultSameSite);
+    public void addCookie(HttpServletResponse response, String name, String value, String path, Integer maxAge, Boolean httpOnly) {
+        addCookie(response, name, value, defaultDomain, path, maxAge, httpOnly, defaultSecure, defaultSameSite);
     }
 
 
@@ -225,6 +227,16 @@ public class CookieUtils {
         response.addHeader("Set-Cookie", cookie.toString());
     }
 
+    public void deleteCookie(HttpServletResponse response, String name, String path) {
+        CookieAttributes cookie = CookieAttributes.builder()
+                .name(name)
+                .domain(defaultDomain)
+                .path(path)
+                .maxAge(0)
+                .build();
+        response.addHeader("Set-Cookie", cookie.toString());
+    }
+
     /**
      * Returns the default Secure flag. <hr>
      * <p>
@@ -246,5 +258,9 @@ public class CookieUtils {
      */
     public String getDefaultSameSite() {
         return this.defaultSameSite;
+    }
+
+    public String getDefaultDomain() {
+        return this.defaultDomain;
     }
 }

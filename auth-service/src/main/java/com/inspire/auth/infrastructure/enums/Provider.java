@@ -3,7 +3,7 @@ package com.inspire.auth.infrastructure.enums;
 import lombok.Getter;
 
 @Getter
-public enum OAuth2Provider {
+public enum Provider {
     INSPIRE,
     GOOGLE,
     KAKAO,

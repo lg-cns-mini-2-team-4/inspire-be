@@ -1,4 +1,4 @@
-package com.inspire.auth.domain.dto;
+package com.inspire.auth.domain.dto.response;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -1,7 +1,6 @@
 package com.inspire.auth.service;
 
-import com.inspire.auth.domain.dto.LoginRequest;
-import com.inspire.auth.domain.dto.LoginResponse;
+import com.inspire.auth.domain.dto.request.LoginRequest;
 import com.inspire.auth.domain.enums.TokenType;
 import com.inspire.auth.exception.AuthErrorCode;
 import com.inspire.auth.exception.AuthException;
@@ -20,7 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.Duration;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;

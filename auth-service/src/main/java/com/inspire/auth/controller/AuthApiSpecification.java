@@ -1,6 +1,5 @@
 package com.inspire.auth.controller;
 
-import com.inspire.auth.domain.dto.request.UserLoginDTO;
 import com.inspire.auth.domain.dto.response.AccessTokenDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
