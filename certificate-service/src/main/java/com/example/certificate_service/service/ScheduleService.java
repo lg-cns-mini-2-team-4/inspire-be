@@ -3,6 +3,7 @@ package com.example.certificate_service.service;
 import com.example.certificate_service.dao.ScheduleRepository;
 import com.example.certificate_service.domain.dto.ScheduleActiveResponseDTO;
 import com.example.certificate_service.domain.dto.ScheduleCalendarResponseDTO;
+import com.example.certificate_service.domain.dto.ScheduleStatusCountResponseDTO;
 import com.example.certificate_service.domain.entity.CertificateEntity;
 import com.example.certificate_service.domain.entity.ScheduleEntity;
 import lombok.RequiredArgsConstructor;
@@ -100,5 +101,32 @@ private final ScheduleRepository scheduleRepository;
                     .practicalExamEnd(schedule.getPracticalExamEnd())
                     .build();
         }).collect(Collectors.toList());
+    }
+
+// [기능 4] 홈 화면 대시보드용 상태별 시험 개수 조회
+    @Transactional(readOnly = true)
+    public ScheduleStatusCountResponseDTO getScheduleStatusCounts() {
+        // KST 타임존 기준 현재 날짜
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
+
+        // 1. 전체 시험 (JpaRepository 기본 제공 메서드 활용)
+        long totalCount = scheduleRepository.count();
+        
+        // 2. 예정된 시험
+        long upcomingCount = scheduleRepository.countUpcomingSchedules(today);
+        
+        // 3. 접수 중인 시험
+        long activeCount = scheduleRepository.countActiveSchedules(today);
+        
+        // 4. 완료된 시험
+        long completedCount = scheduleRepository.countCompletedSchedules(today);
+
+        // DTO 조립 후 반환
+        return ScheduleStatusCountResponseDTO.builder()
+                .totalCount(totalCount)
+                .upcomingCount(upcomingCount)
+                .activeCount(activeCount)
+                .completedCount(completedCount)
+                .build();
     }
 }
