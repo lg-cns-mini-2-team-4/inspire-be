@@ -7,12 +7,14 @@ spring:
   application:
     name: certificate-service # 이름
 
+  profiles:
+    active: local
   # mariadb settings
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
     url: jdbc:mariadb://localhost:3306/inspire?useSSL=true&verifyServerCertificate=false
-    username: root
-    password: 123456789
+    username: ${spring.datasource.username}
+    password: ${spring.datasource.password}
     # url: jdbc:mariadb://${DB_HOST}:3306/inspire?useSSL=true&verifyServerCertificate=false
     # username: ${DB_ADMIN}
     # password: ${DB_PASSWORD}

@@ -2,6 +2,7 @@ package com.example.certificate_service.service;
 
 import com.example.certificate_service.dao.ScheduleRepository;
 import com.example.certificate_service.domain.dto.ScheduleActiveResponseDTO;
+import com.example.certificate_service.domain.dto.ScheduleAllResponseDTO;
 import com.example.certificate_service.domain.entity.CertificateEntity;
 import com.example.certificate_service.domain.entity.ScheduleEntity;
 import lombok.RequiredArgsConstructor;
@@ -45,5 +46,11 @@ private final ScheduleRepository scheduleRepository;
                     .examLocation(schedule.getExamLocation())
                     .build();
         }).collect(Collectors.toList());
+    }
+
+    public List<ScheduleAllResponseDTO> getAllSchedules() {
+        List<ScheduleAllResponseDTO> allExams = null;
+
+        return allExams;
     }
 }
