@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.certificate_service.domain.dto.ScheduleActiveResponseDTO;
-import com.example.certificate_service.domain.dto.ScheduleAllResponseDTO;
 import com.example.certificate_service.service.ScheduleService;
 
 import lombok.RequiredArgsConstructor;
