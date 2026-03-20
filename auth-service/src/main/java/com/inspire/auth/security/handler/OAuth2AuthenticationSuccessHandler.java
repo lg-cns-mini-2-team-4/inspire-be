@@ -7,6 +7,7 @@ import com.inspire.auth.infrastructure.repository.UserCredentialsRepository;
 import com.inspire.auth.security.principal.InspireOAuth2User;
 import com.inspire.auth.service.OneTimeTokenService;
 import com.inspire.auth.service.RefreshTokenService;
+import com.inspire.common.jwt.JwtUtils;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,13 +24,14 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
-    @Value("${frontend.url.registration}")
+    @Value("${app.frontend.url.registration}")
     private String REGISTRATION_URL;
-    @Value("${frontend.url.login-success}")
+    @Value("${app.frontend.url.login-success}")
     private String LOGIN_SUCCESS_URL;
     private final UserCredentialsRepository credentialsRepository;
     private final RefreshTokenService refreshTokenService;
     private final OneTimeTokenService oneTimeTokenService;
+    private final JwtUtils jwtUtils;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -43,7 +45,8 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
         if (credentials.isPresent()) {
             // JWT 토큰 발급 및 redirect
             Long userId = credentials.get().getUserId();
-            refreshTokenService.saveRefreshTokenAndAddCookie(response, userId);
+            String token = jwtUtils.createRefreshToken(userId);
+            refreshTokenService.saveRefreshTokenAndCookie(response, userId, token, jwtUtils.getRefreshExpiresInSeconds());
 
             response.sendRedirect(LOGIN_SUCCESS_URL);
         } else {

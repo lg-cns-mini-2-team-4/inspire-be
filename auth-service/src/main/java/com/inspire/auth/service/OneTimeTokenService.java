@@ -1,13 +1,9 @@
 package com.inspire.auth.service;
 
-import com.inspire.auth.domain.enums.TokenType;
 import com.inspire.auth.domain.vo.OAuth2UserVO;
-import com.inspire.auth.exception.AuthErrorCode;
-import com.inspire.auth.exception.AuthException;
-import com.inspire.auth.infrastructure.store.RedisTokenStore;
+import com.inspire.auth.infrastructure.store.RedisStore;
 import com.inspire.common.cookie.servlet.CookieUtils;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,13 +14,13 @@ import java.util.UUID;
 @Service
 public class OneTimeTokenService {
 
-    private final RedisTokenStore<OAuth2UserVO> oneTimeTokenStore;
+    private final RedisStore<String, OAuth2UserVO> oneTimeTokenStore;
     private final CookieUtils cookieUtils;
     private final String domain;
     private final long onetimeExpiresInSeconds;
     private static final String COOKIE_NAME = "inspire_onetime";
 
-    public OneTimeTokenService(@Qualifier("oneTimeTokenStore") RedisTokenStore<OAuth2UserVO> oneTimeTokenStore,
+    public OneTimeTokenService(@Qualifier("oneTimeTokenStore") RedisStore<String, OAuth2UserVO> oneTimeTokenStore,
                                CookieUtils cookieUtils,
                                @Value("${cookie.domain:#{null}}") String domain) {
         this.oneTimeTokenStore = oneTimeTokenStore;

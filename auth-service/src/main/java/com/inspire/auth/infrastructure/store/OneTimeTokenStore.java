@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Repository("oneTimeTokenStore")
 @RequiredArgsConstructor
-public class OneTimeTokenStore implements RedisTokenStore<OAuth2UserVO> {
+public class OneTimeTokenStore implements RedisStore<String, OAuth2UserVO> {
 
     private final RedisTemplate<String, OAuth2UserVO> oAuth2UserVORedisTemplate;
     private static final TokenType TOKEN_TYPE = TokenType.ONETIME;

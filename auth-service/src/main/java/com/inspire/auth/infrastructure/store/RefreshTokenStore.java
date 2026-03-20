@@ -10,37 +10,37 @@ import java.util.Optional;
 
 @Repository("refreshTokenStore")
 @RequiredArgsConstructor
-public class RefreshTokenStore implements RedisTokenStore<String> {
+public class RefreshTokenStore implements RedisStore<Long, String> {
 
     private final RedisTemplate<String, String> redisTemplate;
     private static final TokenType TOKEN_TYPE = TokenType.REFRESH;
 
     @Override
-    public void save(String token, String userId, Duration ttl) {
-        redisTemplate.opsForValue().set(addPrefix(token), userId, ttl);
+    public void save(Long userId, String token, Duration ttl) {
+        redisTemplate.opsForValue().set(addPrefix(userId), token, ttl);
     }
 
     @Override
-    public void delete(String token) {
-        redisTemplate.delete(addPrefix(token));
+    public void delete(Long userId) {
+        redisTemplate.delete(addPrefix(userId));
     }
 
     @Override
-    public boolean exists(String token) {
-        return redisTemplate.hasKey(addPrefix(token));
+    public boolean exists(Long userId) {
+        return redisTemplate.hasKey(addPrefix(userId));
     }
 
     @Override
-    public Optional<String> get(String token) {
-        return Optional.ofNullable(redisTemplate.opsForValue().get(addPrefix(token)));
+    public Optional<String> get(Long userId) {
+        return Optional.ofNullable(redisTemplate.opsForValue().get(addPrefix(userId)));
     }
 
     @Override
-    public Optional<String> getAndDelete(String token) {
-        return Optional.ofNullable(redisTemplate.opsForValue().getAndDelete(addPrefix(token)));
+    public Optional<String> getAndDelete(Long userId) {
+        return Optional.ofNullable(redisTemplate.opsForValue().getAndDelete(addPrefix(userId)));
     }
 
-    private String addPrefix(String token) {
-        return TOKEN_TYPE.getPrefix() + ":" + token;
+    private String addPrefix(Long userId) {
+        return TOKEN_TYPE.getPrefix() + ":" + userId;
     }
 }

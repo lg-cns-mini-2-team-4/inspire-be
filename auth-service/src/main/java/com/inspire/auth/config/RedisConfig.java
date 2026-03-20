@@ -13,9 +13,10 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.security.jackson2.SimpleGrantedAuthorityMixin;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class RedisConfig {
 
     private final String host;
@@ -45,11 +46,17 @@ public class RedisConfig {
         redisTemplate.setConnectionFactory(redisConnectionFactory);
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(OAuth2UserVO.class));
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        Jackson2JsonRedisSerializer<OAuth2AuthorizationRequest> serializer =
-                new Jackson2JsonRedisSerializer<>(objectMapper, OAuth2AuthorizationRequest.class);
         return redisTemplate;
     }
+
+    @Bean
+    public RedisTemplate<String, OAuth2AuthorizationRequest> oAuth2RequestRedisTemplate(RedisConnectionFactory redisConnectionFactory, ObjectMapper objectMapper) {
+        RedisTemplate<String, OAuth2AuthorizationRequest> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(objectMapper, OAuth2AuthorizationRequest.class));
+        return redisTemplate;
+    }
+
 
 }

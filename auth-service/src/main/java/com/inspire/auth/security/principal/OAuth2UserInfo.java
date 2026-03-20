@@ -1,6 +1,5 @@
-package com.inspire.auth.security.oauth;
+package com.inspire.auth.security.principal;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

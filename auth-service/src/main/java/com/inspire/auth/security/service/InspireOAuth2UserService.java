@@ -1,10 +1,8 @@
 package com.inspire.auth.security.service;
 
-import com.inspire.auth.infrastructure.store.RedisTokenStore;
-import com.inspire.auth.security.oauth.OAuth2UserInfo;
-import com.inspire.auth.security.oauth.OAuth2UserInfoFactory;
+import com.inspire.auth.security.principal.OAuth2UserInfo;
+import com.inspire.auth.security.principal.OAuth2UserInfoFactory;
 import com.inspire.auth.security.principal.InspireOAuth2User;
-import com.inspire.auth.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,7 +11,6 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;

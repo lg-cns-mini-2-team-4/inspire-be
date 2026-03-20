@@ -1,4 +1,4 @@
-package com.inspire.auth.security.oauth;
+package com.inspire.auth.security.principal;
 
 import java.util.Map;
 
