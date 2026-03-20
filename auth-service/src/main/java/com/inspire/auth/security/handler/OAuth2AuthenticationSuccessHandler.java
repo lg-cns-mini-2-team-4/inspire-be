@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -42,11 +43,11 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
         String email = oAuth2User.getEmail();
 
         UserCredentials credentials = credentialsRepository.findByProviderAndExternalId(provider, externalId)
-                .orElseGet(() -> UserCredentials.builder()
+                .orElseGet(() -> credentialsRepository.save(UserCredentials.builder()
                         .email(email)
                         .provider(provider)
                         .externalId(externalId)
-                        .build());
+                        .build()));
 
         Long userId = credentials.getUserId();
         String token = jwtUtils.createRefreshToken(userId);

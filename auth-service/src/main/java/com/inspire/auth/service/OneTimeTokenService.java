@@ -16,23 +16,20 @@ public class OneTimeTokenService {
 
     private final RedisStore<String, OAuth2UserVO> oneTimeTokenStore;
     private final CookieUtils cookieUtils;
-    private final String domain;
     private final long onetimeExpiresInSeconds;
     private static final String COOKIE_NAME = "inspire_onetime";
 
     public OneTimeTokenService(@Qualifier("oneTimeTokenStore") RedisStore<String, OAuth2UserVO> oneTimeTokenStore,
-                               CookieUtils cookieUtils,
-                               @Value("${cookie.domain:#{null}}") String domain) {
+                               CookieUtils cookieUtils) {
         this.oneTimeTokenStore = oneTimeTokenStore;
         this.cookieUtils = cookieUtils;
-        this.domain = domain;
         this.onetimeExpiresInSeconds = 300;
     }
 
     public void saveOneTimeTokenAndAddCookie(HttpServletResponse response, OAuth2UserVO oAuth2UserVO) {
         String token = generateOneTimeToken();
         oneTimeTokenStore.save(token, oAuth2UserVO, Duration.ofSeconds(onetimeExpiresInSeconds));
-        cookieUtils.addCookie(response, COOKIE_NAME, token, domain, "/", (int) onetimeExpiresInSeconds, true);
+        cookieUtils.addCookie(response, COOKIE_NAME, token, "/", (int) onetimeExpiresInSeconds, true);
     }
 
     private String generateOneTimeToken() {

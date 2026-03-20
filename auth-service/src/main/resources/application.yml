@@ -73,6 +73,7 @@ jwt:
   refresh:
     secret: ${JWT_REFRESH_SECRET:inspire-mini-project-team-4-refresh-secret-key}
     expires: ${JWT_REFRESH_EXPIRES:1209600000}
+
 app:
   frontend:
     url:
@@ -80,3 +81,10 @@ app:
       registration: ${FRONTEND_URL_REGISTRATION:http://localhost:5173/register}
       login-success: ${FRONTEND_URL_LOGIN_SUCCESS:http://localhost:5173/login-success}
       login-failure: ${FRONTEND_URL_LOGIN_FAILURE:http://localhost:5173/login-failure}
+
+
+logging:
+  level:
+    com:
+      inspire:
+        auth: debug

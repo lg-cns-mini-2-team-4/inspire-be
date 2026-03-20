@@ -1,14 +1,14 @@
 package com.inspire.auth.service;
 
 import com.inspire.auth.domain.dto.request.LoginRequest;
-import com.inspire.auth.domain.enums.TokenType;
+import com.inspire.auth.domain.dto.result.TokenResult;
 import com.inspire.auth.exception.AuthErrorCode;
 import com.inspire.auth.exception.AuthException;
 import com.inspire.auth.infrastructure.client.UserClient;
 import com.inspire.auth.infrastructure.entity.UserCredentials;
 import com.inspire.auth.infrastructure.enums.Provider;
 import com.inspire.auth.infrastructure.repository.UserCredentialsRepository;
-import com.inspire.auth.infrastructure.store.RedisTokenStore;
+import com.inspire.auth.infrastructure.store.RedisStore;
 import com.inspire.common.jwt.JwtUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,7 +39,7 @@ class AuthServiceTest {
     @Mock
     private UserClient userClient;
     @Mock
-    private RedisTokenStore redisTokenStore;
+    private RedisStore<Long, String> redisStore;
 
     @InjectMocks
     private AuthServiceImpl authService;
@@ -50,26 +50,27 @@ class AuthServiceTest {
         // given
         LoginRequest request = new LoginRequest("test@test.com", "password123");
         UserCredentials user = UserCredentials.builder()
-                .loginId("test@test.com")
+                .userId(200L)
+                .email("test@test.com")
                 .passwordHash("hashedPassword")
                 .provider(Provider.INSPIRE)
                 .build();
         
-        when(userCredentialsRepository.findByLoginIdAndProvider("test@test.com", Provider.INSPIRE))
+        when(userCredentialsRepository.findByEmailAndProvider("test@test.com", Provider.INSPIRE))
                 .thenReturn(Optional.of(user));
         when(passwordEncoder.matches("password123", "hashedPassword")).thenReturn(true);
         when(jwtUtils.createAccessToken(any(), anyList())).thenReturn("access-token");
         when(jwtUtils.createRefreshToken(any())).thenReturn("refresh-token");
 
         // when
-        LoginResponse response = authService.login(request);
+        TokenResult response = authService.login(request);
 
         // then
         assertNotNull(response);
         assertEquals("access-token", response.getAccessToken());
         assertEquals("refresh-token", response.getRefreshToken());
-        verify(redisTokenStore, times(1))
-            .save(eq(TokenType.REFRESH), eq("refresh-token"), any(), eq(Duration.ofDays(14)));
+        verify(redisStore, times(1))
+            .save(eq(200L), eq("refresh-token"), eq(Duration.ZERO));
     }
     
     @Test
@@ -78,7 +79,7 @@ class AuthServiceTest {
         // given
         LoginRequest request = new LoginRequest("test@test.com", "password123");
         
-        when(userCredentialsRepository.findByLoginIdAndProvider("test@test.com", Provider.INSPIRE))
+        when(userCredentialsRepository.findByEmailAndProvider("test@test.com", Provider.INSPIRE))
                 .thenReturn(Optional.empty());
 
         // when & then
@@ -92,12 +93,12 @@ class AuthServiceTest {
         // given
         LoginRequest request = new LoginRequest("test@test.com", "wrongpassword");
         UserCredentials user = UserCredentials.builder()
-                .loginId("test@test.com")
+                .email("test@test.com")
                 .passwordHash("hashedPassword")
                 .provider(Provider.INSPIRE)
                 .build();
         
-        when(userCredentialsRepository.findByLoginIdAndProvider("test@test.com", Provider.INSPIRE))
+        when(userCredentialsRepository.findByEmailAndProvider("test@test.com", Provider.INSPIRE))
                 .thenReturn(Optional.of(user));
         when(passwordEncoder.matches("wrongpassword", "hashedPassword")).thenReturn(false);
 
