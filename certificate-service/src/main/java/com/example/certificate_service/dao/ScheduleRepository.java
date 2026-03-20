@@ -18,9 +18,19 @@ public interface ScheduleRepository extends JpaRepository<ScheduleEntity, Long> 
     // 특정 시행년도의 일정 조회
     List<ScheduleEntity> findByImplYear(String implYear);
 
-    // [추가된 부분] 현재 날짜가 접수 기간 내에 있고, CertificateEntity와 Fetch Join하여 데이터 조회
+    // [기능 1] 현재 날짜가 접수 기간 내에 있고, CertificateEntity와 Fetch Join하여 데이터 조회
     @Query("SELECT s FROM ScheduleEntity s JOIN FETCH s.certificate c " +
            "WHERE :currentDate BETWEEN s.writtenRegStart AND s.writtenRegEnd")
     List<ScheduleEntity> findActiveSchedules(@Param("currentDate") LocalDate currentDate, Pageable pageable);
+
+    // [기능 2] 다가오는 시험 (필기 원서접수 시작일이 현재 날짜보다 큰 일정 중 가장 가까운 3개)
+    @Query("SELECT s FROM ScheduleEntity s JOIN FETCH s.certificate c " +
+           "WHERE s.writtenRegStart > :currentDate " +
+           "ORDER BY s.writtenRegStart ASC")
+    List<ScheduleEntity> findUpcomingSchedules(@Param("currentDate") LocalDate currentDate, Pageable pageable);
+
+    // [기능 3 수정] 특정 연도의 모든 시험 일정 조회 (캘린더용, N+1 방지)
+    @Query("SELECT s FROM ScheduleEntity s JOIN FETCH s.certificate c WHERE s.implYear = :year")
+    List<ScheduleEntity> findSchedulesByYear(@Param("year") String year);
 
 }
