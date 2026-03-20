@@ -22,14 +22,14 @@ public class ScheduleController {
 
     private final ScheduleService scheduleService;
 
-    // 1. home - 현재 접수 중인 시험
+    // [기능 1] 현재 접수중인 시험 API
     @GetMapping("/active")
     public ResponseEntity<List<ScheduleActiveResponseDTO>> getActiveSchedules() {
         List<ScheduleActiveResponseDTO> response = scheduleService.getActiveSchedules();
         return ResponseEntity.ok(response);
     }
 
-    // 2. home - 다가오는 시험
+    // [기능 2] 다가오는 시험 API
     @GetMapping("/upcoming")
     public ResponseEntity<List<ScheduleActiveResponseDTO>> getUpcomingSchedules() {
         List<ScheduleActiveResponseDTO> response = scheduleService.getUpcomingSchedules();

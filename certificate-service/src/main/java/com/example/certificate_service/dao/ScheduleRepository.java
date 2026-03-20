@@ -18,18 +18,27 @@ public interface ScheduleRepository extends JpaRepository<ScheduleEntity, Long> 
     // 특정 시행년도의 일정 조회
     List<ScheduleEntity> findByImplYear(String implYear);
 
-    // 접수 기간 내의 일정 조회
+    // [기능 1] 현재 날짜가 접수 기간 내에 있고, CertificateEntity와 Fetch Join하여 데이터 조회
+    // [기능 3] 현재 날짜가 접수 기간 내에 있는 모든 시험 반환
     @Query("SELECT s FROM ScheduleEntity s JOIN FETCH s.certificate c " +
-           "WHERE :currentDate BETWEEN s.writtenRegStart AND s.writtenRegEnd")
+           "WHERE (:currentDate BETWEEN s.writtenRegStart AND s.writtenRegEnd) " +
+           "   OR (:currentDate BETWEEN s.practicalRegStart AND s.practicalRegEnd)")
     List<ScheduleEntity> findActiveSchedules(@Param("currentDate") LocalDate currentDate, Pageable pageable);
 
     // [기능 2] 다가오는 시험 (필기 원서접수 시작일이 현재 날짜보다 큰 일정 중 가장 가까운 3개)
     @Query("SELECT s FROM ScheduleEntity s JOIN FETCH s.certificate c " +
-           "WHERE s.writtenRegStart > :currentDate " +
-           "ORDER BY s.writtenRegStart ASC")
+           "WHERE (s.writtenRegStart > :currentDate) " +
+           "   OR (s.practicalRegStart > :currentDate) " +
+           "ORDER BY LEAST(COALESCE(s.writtenRegStart, s.practicalRegStart), COALESCE(s.practicalRegStart, s.writtenRegStart)) ASC")
     List<ScheduleEntity> findUpcomingSchedules(@Param("currentDate") LocalDate currentDate, Pageable pageable);
 
-    // [기능 3 수정] 특정 연도의 모든 시험 일정 조회 (캘린더용, N+1 방지)
+    // [기능 4] 전체 시험 조회 (올해 ~ 내년)
+    @Query("SELECT s FROM ScheduleEntity s JOIN FETCH s.certificate c " +
+              "WHERE s.implYear IN (:thisYear, :nextYear) " +
+              "ORDER BY s.writtenRegStart ASC")
+    List<ScheduleEntity> findSchedulesByYears(@Param("thisYear") String thisYear, @Param("nextYear") String nextYear);
+
+    // [기능 5] 특정 연도의 모든 시험 일정 조회 (캘린더용, N+1 방지)
     @Query("SELECT s FROM ScheduleEntity s JOIN FETCH s.certificate c WHERE s.implYear = :year")
     List<ScheduleEntity> findSchedulesByYear(@Param("year") String year);
 
@@ -44,5 +53,4 @@ public interface ScheduleRepository extends JpaRepository<ScheduleEntity, Long> 
     // [기능 4] 접수 종료된 시험 개수 (원서접수 종료일이 현재보다 과거)
     @Query("SELECT COUNT(s) FROM ScheduleEntity s WHERE s.writtenRegEnd < :currentDate")
     long countCompletedSchedules(@Param("currentDate") LocalDate currentDate);
-
 }
