@@ -1,71 +1,101 @@
 package com.inspire.auth.service;
 
-import com.inspire.auth.domain.dto.request.UserLoginDTO;
+import com.inspire.auth.domain.dto.LoginRequest;
+import com.inspire.auth.domain.dto.LoginResponse;
+import com.inspire.auth.domain.dto.SignupRequest;
 import com.inspire.auth.domain.dto.response.AccessTokenDTO;
+import com.inspire.auth.domain.dto.result.ReissueTokenResult;
+import com.inspire.auth.domain.enums.TokenType;
 import com.inspire.auth.exception.AuthErrorCode;
 import com.inspire.auth.exception.AuthException;
+import com.inspire.auth.infrastructure.client.UserClient;
+import com.inspire.auth.infrastructure.client.dto.UserProfileCreateRequest;
 import com.inspire.auth.infrastructure.entity.UserCredentials;
+import com.inspire.auth.infrastructure.enums.Provider;
 import com.inspire.auth.infrastructure.repository.UserCredentialsRepository;
+import com.inspire.auth.infrastructure.store.RedisStore;
+import com.inspire.auth.infrastructure.store.RefreshTokenStore;
 import com.inspire.common.jwt.JwtUtils;
-import jakarta.persistence.Access;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
+    private final UserCredentialsRepository userCredentialsRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
-    private final RefreshTokenService refreshTokenService;
-    private final UserCredentialsRepository credentialsRepository;
+    private final UserClient userClient;
+    private final RedisStore<Long, String> redisStore;
 
     @Override
-    @Transactional(readOnly = true)
-    public AccessTokenDTO login(HttpServletResponse res, UserLoginDTO userLoginDTO) {
-        String email = userLoginDTO.getEmail();
-        String password = userLoginDTO.getPassword();
-        UserCredentials credentials = credentialsRepository.findByEmail(email)
-                .orElse(null);
-
-        if (credentials == null || !passwordEncoder.matches(password, credentials.getPasswordHash())) {
-            throw new AuthException(AuthErrorCode.INVALID_CREDENTIALS);
+    @Transactional
+    public void signup(SignupRequest request) {
+        if (userCredentialsRepository.existsByEmailAndProvider(request.getEmail(), Provider.INSPIRE)) {
+            throw new AuthException(AuthErrorCode.USER_ALREADY_EXISTS);
         }
 
-        Long userId = credentials.getUserId();
-        String accessToken = jwtUtils.createAccessToken(userId, Set.of("ROLE_USER"));
-        String newRefreshToken = jwtUtils.createRefreshToken(userId);
+        UserCredentials user = UserCredentials.builder()
+                .email(request.getEmail())
+                .passwordHash(passwordEncoder.encode(request.getPassword()))
+                .provider(Provider.INSPIRE)
+                .build();
 
-        refreshTokenService.saveRefreshTokenAndCookie(res, userId, newRefreshToken, jwtUtils.getRefreshExpiresInSeconds());
+        userCredentialsRepository.save(user);
 
-        return new AccessTokenDTO(accessToken, jwtUtils.getAccessExpiresInSeconds());
+        // Notify user-service to create profile via OpenFeign
+        userClient.createUserProfile(
+                new UserProfileCreateRequest(user.getUserId(), request.getName(), request.getEmail())
+        );
     }
 
     @Override
-    public AccessTokenDTO reissue(HttpServletResponse res, String refreshToken) {
+    @Transactional(readOnly = true)
+    public LoginResponse login(LoginRequest request) {
+        UserCredentials user = userCredentialsRepository.findByEmailAndProvider(request.getEmail(), Provider.INSPIRE)
+                .orElseThrow(() -> new AuthException(AuthErrorCode.USER_NOT_FOUND));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+            throw new AuthException(AuthErrorCode.INVALID_PASSWORD);
+        }
+
+        String accessToken = jwtUtils.createAccessToken(user.getUserId(), List.of("ROLE_USER"));
+        String refreshToken = jwtUtils.createRefreshToken(user.getUserId());
+
+        // Default TTL for refresh token to 14 days
+        redisStore.save(user.getUserId(), refreshToken, Duration.ofSeconds(jwtUtils.getRefreshExpiresInSeconds()));
+
+        return new LoginResponse(user.getUserId(), accessToken, refreshToken);
+    }
+
+    @Override
+    public ReissueTokenResult reissue(String refreshToken) {
         // jwt 자체가 만료, 위조되면 JwtValidationException 발생
         Long userId = jwtUtils.getUserIdFromRefreshToken(refreshToken);
 
         // 없으면 AuthException (TOKEN_NOT_IN_REDIS) 발생
-        String savedToken = refreshTokenService.getSavedToken(userId);
+        String savedToken = redisStore.get(userId)
+                .orElseThrow(() -> new AuthException(AuthErrorCode.REFRESH_NOT_IN_REDIS));
 
         // 다르면 AuthException (TOKEN_CONFLICT) 발생
         if (!refreshToken.equals(savedToken)) {
             throw new AuthException(AuthErrorCode.TOKEN_CONFLICT);
         }
 
-        String accessToken = jwtUtils.createAccessToken(userId, Set.of("ROLE_USER"));
+        String accessToken = jwtUtils.createAccessToken(userId, List.of("ROLE_USER"));
         String newRefreshToken = jwtUtils.createRefreshToken(userId);
 
-        refreshTokenService.saveRefreshTokenAndCookie(res, userId, newRefreshToken, jwtUtils.getRefreshExpiresInSeconds());
+        redisStore.save(userId, newRefreshToken, Duration.ofSeconds(jwtUtils.getRefreshExpiresInSeconds()));
 
-        return new AccessTokenDTO(accessToken, jwtUtils.getAccessExpiresInSeconds());
+        return new ReissueTokenResult(accessToken, newRefreshToken);
     }
 
     @Override
@@ -83,6 +113,6 @@ public class AuthServiceImpl implements AuthService {
             throw new AuthException(AuthErrorCode.TOKEN_CONFLICT);
         }
 
-        refreshTokenService.clearRefreshTokenAndCookie(res, userId);
+        redisStore.delete(userId);
     }
 }

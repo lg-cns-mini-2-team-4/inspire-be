@@ -2,6 +2,7 @@
 jjwt = "0.11.5"
 springdoc-swagger = "2.8.16"
 jackson = "2.18.4"
+springcloud-openfeign = "4.2.0"
 
 [libraries]
 # JJWT
@@ -15,3 +16,6 @@ jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations
 
 # Swagger Springdoc
 springdoc-swagger = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc-swagger"}
+
+# Spring Cloud
+springcloud-openfeign = { module = "org.springframework.cloud:spring-cloud-starter-openfeign", version.ref = "springcloud-openfeign" }

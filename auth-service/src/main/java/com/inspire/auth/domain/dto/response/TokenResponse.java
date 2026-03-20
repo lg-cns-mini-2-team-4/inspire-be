@@ -18,5 +18,5 @@ public class AccessTokenDTO {
     private String accessToken;
 
     @Schema(description = "토큰 만료 시간 ()")
-    private Long expires;
+    private Integer expires;
 }

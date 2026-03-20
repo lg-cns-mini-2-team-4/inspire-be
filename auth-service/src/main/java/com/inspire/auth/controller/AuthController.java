@@ -1,36 +1,60 @@
 package com.inspire.auth.controller;
 
-import com.inspire.auth.domain.dto.request.UserLoginDTO;
-import com.inspire.auth.domain.dto.response.AccessTokenDTO;
+import com.inspire.auth.domain.dto.response.TokenResponse;
+import com.inspire.auth.domain.dto.result.TokenResult;
 import com.inspire.auth.service.AuthService;
+import com.inspire.common.jwt.config.JwtProperties;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.inspire.auth.domain.dto.request.LoginRequest;
+import com.inspire.auth.domain.dto.response.SignupRequest;
+import com.inspire.auth.exception.AuthErrorCode;
+import com.inspire.auth.exception.AuthException;
+import com.inspire.common.cookie.servlet.CookieUtils;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+
+import java.net.URI;
 
 @Profile("!local")
 @RestController
-@RequiredArgsConstructor
-@RequestMapping("/v1/auth")
-@Tag(name = "auth", description = "임시")
-public class AuthController implements AuthApiSpecification {
+@RequestMapping("/auth")
+@Tag(name = "auth", description = "Authentication APIs")
+public class AuthController {
 
+    private static final String COOKIE_NAME = "inspire_refresh";
     private final AuthService authService;
+    private final CookieUtils cookieUtils;
+    private final Integer accessExpires;
+    private final Integer refreshExpires;
 
-    @PostMapping("/register")
-    public ResponseEntity<Void> register() {
-        return null;
+    public AuthController(AuthService authService, CookieUtils cookieUtils, JwtProperties jwtProperties) {
+        this.authService = authService;
+        this.cookieUtils = cookieUtils;
+        this.accessExpires = (int) (jwtProperties.getAccess().getExpires() / 1000);
+        this.refreshExpires = (int) (jwtProperties.getRefresh().getExpires() / 1000);
+    }
+
+    @PostMapping("/signup")
+    @Operation(summary = "회원가입")
+    public ResponseEntity<Void> signup(@RequestBody @Valid SignupRequest request) {
+        authService.signup(request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AccessTokenDTO> login(HttpServletResponse res, @RequestBody UserLoginDTO userLoginDTO) {
+    @Operation(summary = "일반 로그인")
+    public ResponseEntity<TokenResponse> login(HttpServletResponse res, @RequestBody @Valid LoginRequest request) {
 
-        AccessTokenDTO accessTokenDTO = authService.login(res, userLoginDTO);
-        return ResponseEntity.ok(accessTokenDTO);
+        TokenResult tokenResult = authService.login(request);
+        cookieUtils.addCookie(res, COOKIE_NAME, tokenResult.getRefreshToken(), "/", refreshExpires, true);
+
+        return ResponseEntity.ok(new TokenResponse(tokenResult.getAccessToken(), accessExpires));
     }
 
     @Operation(summary = "로그아웃", description = "서버 측 세션(Refresh Token)을 무효화하고 쿠키를 초기화합니다.")
@@ -41,13 +65,32 @@ public class AuthController implements AuthApiSpecification {
                                        @CookieValue(name = "inspire_refresh", required = false) String refreshToken) {
 
         authService.logout(res, userId, refreshToken);
+        cookieUtils.deleteCookie(res, COOKIE_NAME, "/");
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/reissue")
-    public ResponseEntity<AccessTokenDTO> reissue(HttpServletResponse response, @CookieValue(name = "inspire_refresh") String refreshToken) {
-
-        AccessTokenDTO accessTokenDTO = authService.reissue(response, refreshToken);
-        return ResponseEntity.ok(accessTokenDTO);
+    public ResponseEntity<TokenResponse> reissue(HttpServletResponse res, @CookieValue(name = "inspire_refresh") String refreshToken) {
+        TokenResult tokenResult = authService.reissue(refreshToken);
+        cookieUtils.addCookie(res, COOKIE_NAME, tokenResult.getRefreshToken(), "/", refreshExpires, true);
+        return ResponseEntity.ok(new TokenResponse(tokenResult.getAccessToken(), accessExpires));
     }
+
+    @ExceptionHandler(AuthException.class)
+    public ResponseEntity<Void> handleAuthException(AuthException e) {
+        if (e.getErrorCode() == AuthErrorCode.USER_NOT_FOUND || e.getErrorCode() == AuthErrorCode.INVALID_PASSWORD) {
+            return ResponseEntity.status(HttpStatus.SEE_OTHER)
+                    .location(URI.create("/login?error"))
+                    .build();
+        }
+        return ResponseEntity.status(e.getErrorCode().getStatus()).build();
+    }
+
+    // Keep test endpoints below
+    @GetMapping("/test")
+    public String test() {
+        return "test";
+    }
+
+
 }
