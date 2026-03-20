@@ -38,7 +38,7 @@ public class SearchController {
         }
         // 전체 시험 
         System.out.println(">>> Search Controller All Exams");
-        List<ScheduleAllResponseDTO> allExams = scheduleService.getAllSchedules();  // 지혁님 만드신 DTO 및 메서드로 수정
-        return ResponseEntity.ok(allExams);
+        // List<ScheduleAllResponseDTO> allExams = scheduleService.getAllSchedules();  // 지혁님 만드신 DTO 및 메서드로 수정
+        return null;
     }
 }
