@@ -43,3 +43,10 @@ resilience4j:
       productService:
         failure-rate-threshold: 40
         wait-duration-in-open-state: 10s
+
+# api 
+api:
+  qnet:
+    service-key: ${QNET_SERVICE_KEY:0082b26b195ea6d25a6849f63297b1d56c8d31219c11e2de36acf1f0ee12796f}
+    certificate-url: https://openapi.q-net.or.kr/api/service/rest/InquiryListNationalQualifcationSVC/getList
+    schedule-url: https://apis.data.go.kr/B490007/qualExamSchd/getQualExamSchdList

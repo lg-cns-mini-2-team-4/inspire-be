@@ -25,6 +25,12 @@ repositories {
 }
 
 dependencies {
+	// 공공API XML 파싱
+	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
+
+	// WebClient (공공API 호출용)
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	compileOnly 'org.projectlombok:lombok'

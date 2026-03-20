@@ -1,5 +1,5 @@
 package com.example.certificate_service.dao;
-
+import com.example.certificate_service.domain.entity.CertificateEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -32,5 +32,9 @@ public interface ScheduleRepository extends JpaRepository<ScheduleEntity, Long> 
     // [기능 3 수정] 특정 연도의 모든 시험 일정 조회 (캘린더용, N+1 방지)
     @Query("SELECT s FROM ScheduleEntity s JOIN FETCH s.certificate c WHERE s.implYear = :year")
     List<ScheduleEntity> findSchedulesByYear(@Param("year") String year);
+
+        // 중복 저장 방지용
+    boolean existsByImplYearAndImplSeqAndCertificate(String implYear, Integer implSeq, CertificateEntity certificate);
+
 
 }
