@@ -48,6 +48,18 @@ public class ScheduleEntity {
     @Column(name = "practical_exam_end")
     private LocalDate practicalExamEnd; // 실기 종료
 
+    @Column(name = "practical_reg_start")
+    private LocalDate practicalRegStart; // 실기시험 원서접수 시작
+
+    @Column(name = "practical_reg_end")
+    private LocalDate practicalRegEnd; // 실기시험 원서접수 종료
+
+    @Column(name = "description")
+    private String description; // 설명
+
+    @Column(name = "practical_pass_date")
+    private LocalDate practicalPassDate; // 실기시험 합격 발표일
+
     @Column(name = "office_code")
     private String officeCode; // 지사코드
 
