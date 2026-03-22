@@ -60,15 +60,16 @@ public class ScheduleEntity {
     @Column(name = "description")
     private String description; // 설명
 
-    @Column(name = "office_code")
-    private String officeCode; // 지사코드
+    // @Column(name = "office_code")
+    // private String officeCode; // 지사코드
 
-    @Column(name = "office_name")
-    private String officeName; // 지사명
+    // @Column(name = "office_name")
+    // private String officeName; // 지사명
 
-    @Column(name = "exam_location")
-    private String examLocation; // 시행장소
+    // @Column(name = "exam_location")
+    // private String examLocation; // 시행장소
 
-    @Column(name = "location_number")
-    private String locationNumber; // 전화번호
+    // @Column(name = "location_number")
+    // private String locationNumber; // 전화번호
+
 }

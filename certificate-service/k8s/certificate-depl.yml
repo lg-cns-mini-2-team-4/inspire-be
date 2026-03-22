@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: certificate-deployment
+  namespace: lgcns
+
+spec:
+  revisionsHistoryLimit: 3
+
+  replicas: 1
+  selector:
+    matchLabels:
+      app: certificate
+
+  template:
+    metadata:
+      labels:
+        app: certificate
+    spec:
+      containers:
+        - name: certificate
+          image: None # ECR 경로
+
+          ports:
+          - containerPort: 8080
+          
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+
+          env:
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: certificate-db-secret
+                  key: DB_HOST
+            - name: DB_ADMIN
+              valueFrom:
+                secretKeyRef:
+                  name: certificate-db-secret
+                  key: DB_ADMIN
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: certificate-db-secret
+                  key: DB_PASSWORD
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: certificate-service
+  namespace: lgcns
+spec:
+  selector:
+    app: certificate
+  ports:
+    - port: 80
+      targetPort: 8080
+  selector:
+    app: certificate

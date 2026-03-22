@@ -24,5 +24,6 @@ public class ScheduleCalendarResponseDTO {
     private LocalDate practicalExamStart;// 실기 시작
     private LocalDate practicalExamEnd;  // 실기 종료
     private LocalDate practicalPassDate; // 실기시험 합격 발표일
+    private String description;        // 설명
 
 }
