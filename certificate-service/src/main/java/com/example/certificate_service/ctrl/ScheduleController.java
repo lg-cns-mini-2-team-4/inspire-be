@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/schedules")
+@RequestMapping("/schedules")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:5173") // 리액트 주소를 허용합니다.
 public class ScheduleController {
@@ -49,6 +49,5 @@ public class ScheduleController {
         List<ScheduleCalendarResponseDTO> response = scheduleService.getSchedulesByYearForCalendar(year);
         return ResponseEntity.ok(response);
     }
-
 
 }

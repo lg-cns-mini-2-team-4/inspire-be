@@ -19,7 +19,7 @@ public class ScheduleEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_code")
-    private CertificateEntity certificate; // 종목 정보 (FK 연관관계)
+    private CertificateEntity certificate; // 종목 코드 (FK)
 
     @Column(name = "impl_year")
     private String implYear; // 시행년도
@@ -42,17 +42,11 @@ public class ScheduleEntity {
     @Column(name = "written_pass_date")
     private LocalDate writtenPassDate; // 필기시험 합격 발표일
 
-    // @Column(name = "practical_reg_start")
-    // private LocalDate practicalRegStart; // 실기시험 원서접수 시작
+    @Column(name = "practical_reg_start")
+    private LocalDate practicalRegStart; // 실기시험 원서접수 시작
 
-    // @Column(name = "practical_reg_end")
-    // private LocalDate practicalRegEnd; // 실기시험 원서접수 종료
-
-    // @Column(name = "description")
-    // private String description; // 설명
-
-    // @Column(name = "practical_pass_date")
-    // private LocalDate practicalPassDate; // 실기시험 합격 발표일
+    @Column(name = "practical_reg_end")
+    private LocalDate practicalRegEnd; // 실기시험 원서접수 종료
 
     @Column(name = "practical_exam_start")
     private LocalDate practicalExamStart; // 실기 시작
@@ -60,17 +54,11 @@ public class ScheduleEntity {
     @Column(name = "practical_exam_end")
     private LocalDate practicalExamEnd; // 실기 종료
 
-    @Column(name = "practical_reg_start")
-    private LocalDate practicalRegStart; // 실기시험 원서접수 시작
-
-    @Column(name = "practical_reg_end")
-    private LocalDate practicalRegEnd; // 실기시험 원서접수 종료
+    @Column(name = "practical_pass_date")
+    private LocalDate practicalPassDate; // 실기시험 합격 발표일
 
     @Column(name = "description")
     private String description; // 설명
-
-    @Column(name = "practical_pass_date")
-    private LocalDate practicalPassDate; // 실기시험 합격 발표일
 
     @Column(name = "office_code")
     private String officeCode; // 지사코드

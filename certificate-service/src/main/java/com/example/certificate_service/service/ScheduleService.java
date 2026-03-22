@@ -20,17 +20,14 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ScheduleService {
-private final ScheduleRepository scheduleRepository;
+    private final ScheduleRepository scheduleRepository;
 
     // [기능 1] 접수 중인 시험 3개 조회
     @Transactional(readOnly = true)
     public List<ScheduleActiveResponseDTO> getActiveSchedules() {
-        // K8S 파드(Pod)의 UTC 타임존 설정을 대비하여 명시적으로 서울 시간 객체 생성
         LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
-        
-        // 3개의 데이터만 제한적으로 가져오기 위해 PageRequest 생성
         Pageable limitThree = PageRequest.of(0, 3);
-        
+
         List<ScheduleEntity> schedules = scheduleRepository.findActiveSchedules(today, limitThree);
 
         // Entity -> DTO 매핑하여 반환
@@ -40,6 +37,7 @@ private final ScheduleRepository scheduleRepository;
                     .itemCode(cert.getItemCode())
                     .itemName(cert.getItemName())
                     .largeFieldName(cert.getLargeFieldName())
+                    .mediumFieldName(cert.getMediumFieldName())
                     .writtenRegStart(schedule.getWrittenRegStart())
                     .writtenRegEnd(schedule.getWrittenRegEnd())
                     .writtenExamStart(schedule.getWrittenExamStart())
@@ -49,6 +47,7 @@ private final ScheduleRepository scheduleRepository;
                     .practicalExamStart(schedule.getPracticalExamStart())
                     .practicalExamEnd(schedule.getPracticalExamEnd())
                     .description(schedule.getDescription())
+                    .officeName(schedule.getOfficeName())
                     .examLocation(schedule.getExamLocation())
                     .build();
         }).collect(Collectors.toList());
@@ -73,6 +72,7 @@ private final ScheduleRepository scheduleRepository;
                     .itemCode(cert.getItemCode())
                     .itemName(cert.getItemName())
                     .largeFieldName(cert.getLargeFieldName())
+                    .mediumFieldName(cert.getMediumFieldName())
                     .writtenRegStart(schedule.getWrittenRegStart())
                     .writtenRegEnd(schedule.getWrittenRegEnd())
                     .writtenExamStart(schedule.getWrittenExamStart())
@@ -138,13 +138,17 @@ private final ScheduleRepository scheduleRepository;
                     .itemCode(cert.getItemCode())
                     .itemName(cert.getItemName())
                     .largeFieldName(cert.getLargeFieldName())
+                    .mediumFieldName(cert.getMediumFieldName())
                     .writtenRegStart(schedule.getWrittenRegStart())
                     .writtenRegEnd(schedule.getWrittenRegEnd())
                     .writtenExamStart(schedule.getWrittenExamStart())
                     .writtenExamEnd(schedule.getWrittenExamEnd())
                     .writtenPassDate(schedule.getWrittenPassDate())
+                    .practicalRegStart(schedule.getPracticalRegStart())
+                    .practicalRegEnd(schedule.getPracticalRegEnd())
                     .practicalExamStart(schedule.getPracticalExamStart())
                     .practicalExamEnd(schedule.getPracticalExamEnd())
+                    .practicalPassDate(schedule.getPracticalPassDate())
                     .build();
         }).collect(Collectors.toList());
     }
@@ -185,6 +189,7 @@ private final ScheduleRepository scheduleRepository;
                 .itemCode(cert.getItemCode())
                 .itemName(cert.getItemName())
                 .largeFieldName(cert.getLargeFieldName())
+                .mediumFieldName(cert.getMediumFieldName())
                 .writtenRegStart(schedule.getWrittenRegStart())
                 .writtenRegEnd(schedule.getWrittenRegEnd())
                 .writtenExamStart(schedule.getWrittenExamStart())

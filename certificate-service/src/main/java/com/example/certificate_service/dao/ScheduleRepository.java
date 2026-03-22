@@ -11,13 +11,7 @@ import java.util.List;
 import com.example.certificate_service.domain.entity.ScheduleEntity;
 
 @Repository
-public interface ScheduleRepository extends JpaRepository<ScheduleEntity, Long> {
-    // 특정 자격증(item_code)의 모든 일정을 조회
-    List<ScheduleEntity> findByCertificate_ItemCode(String itemCode);
-    
-    // 특정 시행년도의 일정 조회
-    List<ScheduleEntity> findByImplYear(String implYear);
-
+public interface ScheduleRepository extends JpaRepository<ScheduleEntity, Long> {    
     // [기능 1] 현재 날짜가 접수 기간 내에 있고, CertificateEntity와 Fetch Join하여 데이터 조회
     // [기능 3] 현재 날짜가 접수 기간 내에 있는 모든 시험 반환
     @Query("SELECT s FROM ScheduleEntity s JOIN FETCH s.certificate c " +
@@ -26,11 +20,17 @@ public interface ScheduleRepository extends JpaRepository<ScheduleEntity, Long> 
     List<ScheduleEntity> findActiveSchedules(@Param("currentDate") LocalDate currentDate, Pageable pageable);
 
     // [기능 2] 다가오는 시험 (필기 원서접수 시작일이 현재 날짜보다 큰 일정 중 가장 가까운 3개)
-    @Query("SELECT s FROM ScheduleEntity s JOIN FETCH s.certificate c " +
-           "WHERE (s.writtenRegStart > :currentDate) " +
-           "   OR (s.practicalRegStart > :currentDate) " +
-           "ORDER BY LEAST(COALESCE(s.writtenRegStart, s.practicalRegStart), COALESCE(s.practicalRegStart, s.writtenRegStart)) ASC")
-    List<ScheduleEntity> findUpcomingSchedules(@Param("currentDate") LocalDate currentDate, Pageable pageable);
+       @Query("SELECT s FROM ScheduleEntity s JOIN FETCH s.certificate c " +
+              "WHERE (YEAR(s.writtenRegStart) = YEAR(:currentDate) OR YEAR(s.practicalRegStart) = YEAR(:currentDate)) " + // 올해 일정만 필터링
+              "AND ((s.writtenRegStart > :currentDate) OR (s.practicalRegStart > :currentDate)) " +
+              "ORDER BY LEAST(COALESCE(s.writtenRegStart, s.practicalRegStart), COALESCE(s.practicalRegStart, s.writtenRegStart)) ASC")
+       List<ScheduleEntity> findUpcomingSchedules(@Param("currentDate") LocalDate currentDate, Pageable pageable);
+
+
+
+
+
+
 
     // [기능 4] 전체 시험 조회 (올해 ~ 내년)
     @Query("SELECT s FROM ScheduleEntity s JOIN FETCH s.certificate c " +
@@ -42,15 +42,34 @@ public interface ScheduleRepository extends JpaRepository<ScheduleEntity, Long> 
     @Query("SELECT s FROM ScheduleEntity s JOIN FETCH s.certificate c WHERE s.implYear = :year")
     List<ScheduleEntity> findSchedulesByYear(@Param("year") String year);
 
+
+
+
+
+
     // [기능 4] 예정된 시험 개수 (원서접수 시작일이 현재보다 미래)
-    @Query("SELECT COUNT(s) FROM ScheduleEntity s WHERE s.writtenRegStart > :currentDate")
-    long countUpcomingSchedules(@Param("currentDate") LocalDate currentDate);
+        @Query("SELECT COUNT(s) FROM ScheduleEntity s " +
+            "WHERE (YEAR(s.writtenRegStart) = YEAR(:currentDate) OR YEAR(s.practicalRegStart) = YEAR(:currentDate)) " +
+            "AND (s.writtenRegStart > :currentDate OR s.practicalRegStart > :currentDate)")
+       long countUpcomingSchedules(@Param("currentDate") LocalDate currentDate);
 
     // [기능 4] 접수 중인 시험 개수 (원서접수 시작일 <= 현재 <= 종료일)
-    @Query("SELECT COUNT(s) FROM ScheduleEntity s WHERE :currentDate BETWEEN s.writtenRegStart AND s.writtenRegEnd")
+    @Query("SELECT COUNT(s) FROM ScheduleEntity s " +
+        "WHERE (YEAR(s.writtenRegStart) = YEAR(:currentDate) OR YEAR(s.practicalRegStart) = YEAR(:currentDate)) " +
+        "AND (" +
+        "  (:currentDate BETWEEN s.writtenRegStart AND s.writtenRegEnd) " + // 필기 접수 중
+        "  OR " +
+        "  (:currentDate BETWEEN s.practicalRegStart AND s.practicalRegEnd)" + // 실기 접수 중
+        ")")
     long countActiveSchedules(@Param("currentDate") LocalDate currentDate);
 
-    // [기능 4] 접수 종료된 시험 개수 (원서접수 종료일이 현재보다 과거)
-    @Query("SELECT COUNT(s) FROM ScheduleEntity s WHERE s.writtenRegEnd < :currentDate")
+    // [기능 5] 접수 종료된 시험 개수 (원서접수 종료일이 현재보다 과거)
+    @Query("SELECT COUNT(s) FROM ScheduleEntity s " +
+        "WHERE (YEAR(s.writtenRegEnd) = YEAR(:currentDate) OR YEAR(s.practicalRegEnd) = YEAR(:currentDate)) " + 
+        "AND (" +
+        "  (s.writtenRegEnd < :currentDate) " + // 필기 접수 종료
+        "  OR " +
+        "  (s.practicalRegEnd < :currentDate)" + // 실기 접수 종료
+        ")")
     long countCompletedSchedules(@Param("currentDate") LocalDate currentDate);
 }
