@@ -1,0 +1,15 @@
+plugins {
+    id 'spring-library-conventions'
+}
+
+version = "1.0.0"
+
+dependencies {
+    compileOnly 'org.springframework:spring-web'
+    compileOnly 'com.fasterxml.jackson.core:jackson-databind'
+    compileOnly 'jakarta.validation:jakarta.validation-api'
+    testImplementation 'org.springframework:spring-web'
+    testImplementation 'com.fasterxml.jackson.core:jackson-databind'
+    testImplementation 'org.hibernate.validator:hibernate-validator'
+    testImplementation 'org.glassfish:jakarta.el:4.0.2'
+}

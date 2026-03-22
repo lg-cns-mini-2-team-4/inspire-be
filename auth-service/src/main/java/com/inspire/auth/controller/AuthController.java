@@ -5,14 +5,12 @@ import com.inspire.auth.domain.dto.result.TokenResult;
 import com.inspire.auth.service.AuthService;
 import com.inspire.common.jwt.config.JwtProperties;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.inspire.auth.domain.dto.request.LoginRequest;
-import com.inspire.auth.domain.dto.response.SignupRequest;
+import com.inspire.auth.domain.dto.request.SignupRequest;
 import com.inspire.auth.exception.AuthErrorCode;
 import com.inspire.auth.exception.AuthException;
 import com.inspire.common.cookie.servlet.CookieUtils;
@@ -21,11 +19,10 @@ import org.springframework.http.HttpStatus;
 
 import java.net.URI;
 
-@Profile("!local")
 @RestController
 @RequestMapping("/auth")
 @Tag(name = "auth", description = "Authentication APIs")
-public class AuthController {
+public class AuthController implements AuthApiSpecification {
 
     private static final String COOKIE_NAME = "inspire_refresh";
     private final AuthService authService;
@@ -57,12 +54,10 @@ public class AuthController {
         return ResponseEntity.ok(new TokenResponse(tokenResult.getAccessToken(), accessExpires));
     }
 
-    @Operation(summary = "로그아웃", description = "서버 측 세션(Refresh Token)을 무효화하고 쿠키를 초기화합니다.")
-    @ApiResponse(responseCode = "204", description = "로그아웃 성공")
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletResponse res,
                                        @RequestHeader(name = "X-User-Id", required = false) Long userId,
-                                       @CookieValue(name = "inspire_refresh", required = false) String refreshToken) {
+                                       @CookieValue(name = COOKIE_NAME, required = false) String refreshToken) {
 
         authService.logout(res, userId, refreshToken);
         cookieUtils.deleteCookie(res, COOKIE_NAME, "/");
@@ -70,7 +65,7 @@ public class AuthController {
     }
 
     @PostMapping("/reissue")
-    public ResponseEntity<TokenResponse> reissue(HttpServletResponse res, @CookieValue(name = "inspire_refresh") String refreshToken) {
+    public ResponseEntity<TokenResponse> reissue(HttpServletResponse res, @CookieValue(name = COOKIE_NAME) String refreshToken) {
         TokenResult tokenResult = authService.reissue(refreshToken);
         cookieUtils.addCookie(res, COOKIE_NAME, tokenResult.getRefreshToken(), "/", refreshExpires, true);
         return ResponseEntity.ok(new TokenResponse(tokenResult.getAccessToken(), accessExpires));
@@ -92,5 +87,11 @@ public class AuthController {
         return "test";
     }
 
-
+    // 임시 -> 나중엔 회원가입 따로 시킴
+    @PostMapping("/oauth/signup")
+    public ResponseEntity<Void> tempOAuth2Signup(HttpServletResponse res, @CookieValue(name = "inspire_onetime") String oneTimeToken) {
+        authService.tempOAuth2Signup(oneTimeToken);
+        cookieUtils.deleteCookie(res, "inspire_onetime", "/");
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
 }

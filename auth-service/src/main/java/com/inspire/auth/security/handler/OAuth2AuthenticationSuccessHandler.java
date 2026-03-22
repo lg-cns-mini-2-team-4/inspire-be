@@ -1,10 +1,12 @@
 package com.inspire.auth.security.handler;
 
+import com.inspire.auth.domain.vo.OAuth2UserVO;
 import com.inspire.auth.infrastructure.entity.UserCredentials;
 import com.inspire.auth.infrastructure.enums.Provider;
 import com.inspire.auth.infrastructure.repository.UserCredentialsRepository;
 import com.inspire.auth.infrastructure.store.RedisStore;
 import com.inspire.auth.security.principal.InspireOAuth2User;
+import com.inspire.auth.service.OneTimeTokenService;
 import com.inspire.common.cookie.servlet.CookieUtils;
 import com.inspire.common.jwt.JwtUtils;
 import jakarta.servlet.ServletException;
@@ -30,7 +32,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
     private String LOGIN_SUCCESS_URL;
     private final UserCredentialsRepository credentialsRepository;
     private final RedisStore<Long, String> redisStore;
-    //  private final OneTimeTokenService oneTimeTokenService;
+    private final OneTimeTokenService oneTimeTokenService;
     private final JwtUtils jwtUtils;
     private final CookieUtils cookieUtils;
     private static final String COOKIE_NAME = "inspire_refresh";
@@ -41,21 +43,22 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
         Provider provider = Provider.valueOf(oAuth2User.getProvider().toUpperCase());
         String externalId = oAuth2User.getExternalId();
         String email = oAuth2User.getEmail();
+        String externalName = oAuth2User.getExternalName();
 
-        UserCredentials credentials = credentialsRepository.findByProviderAndExternalId(provider, externalId)
-                .orElseGet(() -> credentialsRepository.save(UserCredentials.builder()
-                        .email(email)
-                        .provider(provider)
-                        .externalId(externalId)
-                        .build()));
 
-        Long userId = credentials.getUserId();
-        String token = jwtUtils.createRefreshToken(userId);
-        long expires = jwtUtils.getRefreshExpiresInSeconds();
-        redisStore.save(userId, token, Duration.ofSeconds(expires));
+        Optional<UserCredentials> credentials = credentialsRepository.findByProviderAndExternalId(provider, externalId);
 
-        cookieUtils.addCookie(response, COOKIE_NAME, token, "/", (int) expires, true);
-
-        response.sendRedirect(LOGIN_SUCCESS_URL);
+        if (credentials.isPresent()) {
+            Long userId = credentials.get().getUserId();
+            String token = jwtUtils.createRefreshToken(userId);
+            long expires = jwtUtils.getRefreshExpiresInSeconds();
+            redisStore.save(userId, token, Duration.ofSeconds(expires));
+            cookieUtils.addCookie(response, COOKIE_NAME, token, "/", (int) expires, true);
+            response.sendRedirect(LOGIN_SUCCESS_URL);
+        } else {
+            OAuth2UserVO vo = new OAuth2UserVO(externalId, externalName, email, oAuth2User.getProvider());
+            oneTimeTokenService.saveOneTimeTokenAndAddCookie(response, vo);
+            response.sendRedirect(REGISTRATION_URL);
+        }
     }
 }

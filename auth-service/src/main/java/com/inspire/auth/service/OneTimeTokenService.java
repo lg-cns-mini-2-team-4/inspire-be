@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -30,6 +31,10 @@ public class OneTimeTokenService {
         String token = generateOneTimeToken();
         oneTimeTokenStore.save(token, oAuth2UserVO, Duration.ofSeconds(onetimeExpiresInSeconds));
         cookieUtils.addCookie(response, COOKIE_NAME, token, "/", (int) onetimeExpiresInSeconds, true);
+    }
+
+    public Optional<OAuth2UserVO> tempGetOAuth2VO(String token) {
+        return oneTimeTokenStore.getAndDelete(token);
     }
 
     private String generateOneTimeToken() {

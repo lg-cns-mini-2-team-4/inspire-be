@@ -17,6 +17,6 @@ public class TokenResponse {
             example = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYWtiaW4xMjMifQ...")
     private String accessToken;
 
-    @Schema(description = "토큰 만료 시간 ()")
+    @Schema(description = "토큰 만료 시간 (초 단위)", example = "1800")
     private Integer expires;
 }

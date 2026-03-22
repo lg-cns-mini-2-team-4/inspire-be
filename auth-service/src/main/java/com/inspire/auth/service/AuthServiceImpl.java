@@ -1,8 +1,10 @@
 package com.inspire.auth.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inspire.auth.domain.dto.request.LoginRequest;
-import com.inspire.auth.domain.dto.response.SignupRequest;
+import com.inspire.auth.domain.dto.request.SignupRequest;
 import com.inspire.auth.domain.dto.result.TokenResult;
+import com.inspire.auth.domain.vo.OAuth2UserVO;
 import com.inspire.auth.exception.AuthErrorCode;
 import com.inspire.auth.exception.AuthException;
 import com.inspire.auth.infrastructure.client.UserClient;
@@ -12,8 +14,10 @@ import com.inspire.auth.infrastructure.enums.Provider;
 import com.inspire.auth.infrastructure.repository.UserCredentialsRepository;
 import com.inspire.auth.infrastructure.store.RedisStore;
 import com.inspire.common.jwt.JwtUtils;
+import feign.FeignException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +25,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -31,6 +37,8 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtils jwtUtils;
     private final UserClient userClient;
     private final RedisStore<Long, String> redisStore;
+    private final OneTimeTokenService oneTimeTokenService;
+    private final ObjectMapper objectMapper;
 
     @Override
     @Transactional
@@ -47,10 +55,23 @@ public class AuthServiceImpl implements AuthService {
 
         userCredentialsRepository.save(user);
 
-        // Notify user-service to create profile via OpenFeign
-        userClient.createUserProfile(
-                new UserProfileCreateRequest(user.getUserId(), request.getName(), request.getEmail())
-        );
+        try {
+            userClient.createUserProfile(UserProfileCreateRequest.builder()
+                    .id(user.getUserId())
+                    .name(request.getName())
+                    .phone(request.getPhone())
+                    .email(request.getEmail())
+                    .build()
+            );
+        } catch (FeignException e) {
+            log.debug("**************************************");
+            log.debug(e.getMessage());
+            log.debug("**************************************");
+            log.debug(e.request().toString());
+            log.debug("**************************************");
+            log.debug(e.contentUTF8());
+            throw new AuthException(AuthErrorCode.FEIGN_CLIENT_ERROR);
+        }
     }
 
     @Override
@@ -111,4 +132,31 @@ public class AuthServiceImpl implements AuthService {
 
         redisStore.delete(userId);
     }
+
+    @Override
+    @Transactional
+    public void tempOAuth2Signup(String onetimeToken) {
+        OAuth2UserVO vo = oneTimeTokenService.tempGetOAuth2VO(onetimeToken)
+                .orElseThrow(() -> new AuthException(AuthErrorCode.ONETIME_NOT_IN_REDIS));
+
+        UserCredentials user = UserCredentials.builder()
+                .email(vo.getEmail())
+                .provider(Provider.valueOf(vo.getProvider().toUpperCase()))
+                .externalId(vo.getExternalId())
+                .build();
+
+        userCredentialsRepository.save(user);
+
+        try {
+            userClient.createUserProfile(UserProfileCreateRequest.builder()
+                    .id(user.getUserId())
+                    .name(vo.getName())
+                    .email(vo.getEmail())
+                    .build()
+            );
+        } catch (FeignException e) {
+            throw new AuthException(AuthErrorCode.FEIGN_CLIENT_ERROR);
+        }
+    }
 }
+

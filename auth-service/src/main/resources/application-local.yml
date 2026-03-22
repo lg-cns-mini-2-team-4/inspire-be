@@ -29,3 +29,7 @@ spring:
   h2:
     console:
       enabled: true
+
+app:
+  user:
+    url: "http://localhost:12322"

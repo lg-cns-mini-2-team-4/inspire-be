@@ -6,7 +6,7 @@ spring:
     name: auth-service
 
   profiles:
-    active: "local"
+    default: local
 
   security:
     oauth2:
@@ -78,13 +78,11 @@ app:
   frontend:
     url:
       base: ${FRONTEND_URL_BASE:http://localhost:5173}
-      registration: ${FRONTEND_URL_REGISTRATION:http://localhost:5173/register}
+      registration: ${FRONTEND_URL_REGISTRATION:http://localhost:5173/oauth-register}
       login-success: ${FRONTEND_URL_LOGIN_SUCCESS:http://localhost:5173/login-success}
       login-failure: ${FRONTEND_URL_LOGIN_FAILURE:http://localhost:5173/login-failure}
 
 
 logging:
   level:
-    com:
-      inspire:
-        auth: debug
+    root: debug
