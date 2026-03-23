@@ -160,6 +160,7 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import com.example.certificate_service.domain.dto.CertificateWithSchedulesDTO;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -173,6 +174,9 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class CertificateService {
+
+    @Value("${api.max.size:10}")
+    private long maxSize;
 
     private final CertificateRepository certificateRepository;
     private final ScheduleRepository scheduleRepository;
@@ -256,58 +260,27 @@ public class CertificateService {
         certificateRepository.save(entity);
     }
 
-    // // 시험 일정 동기화 
-    // @Transactional
-    // public void syncSchedules(String year) {
-    //     List<CertificateEntity> certificates = certificateRepository.findAll();
-
-    //     for (CertificateEntity certificate : certificates) {
-    //         String json = publicApiClient.fetchScheduleList(
-    //             year,
-    //             certificate.getItemCode(),
-    //             certificate.getCertTypeCode()
-    //         ); // xml → json
-    //         if (json == null) continue; 
-
-    //         try {
-    //             JsonNode root = objectMapper.readTree(json);
-    //             JsonNode items = root.path("body").path("items").path("item");
-
-    //             if (items.isObject()) {
-    //                 saveSchedule(items, certificate);
-    //             } else if (items.isArray()) {
-    //                 for (JsonNode item : items) {
-    //                     saveSchedule(item, certificate);
-    //                 }
-    //             }
-    //         } catch (Exception e) {
-    //             log.error("시험일정 파싱 실패 ({}년 {}): {}", year, certificate.getItemCode(), e.getMessage());
-    //         }
-    //     }
-    //     log.info("{}년 시험일정 동기화 완료", year);
-    // }
-
     // 시험 일정 동기화 (상위 10개 한정 및 JSON 출력 버전)
     @Transactional
     public void syncSchedules(String year) {
         // stream()과 limit(10)을 사용하여 상위 10개만 가져옵니다.
         List<CertificateEntity> certificates = certificateRepository.findAll()
                 .stream()
-                .limit(10)
+                .limit(maxSize)
                 .toList();
 
         for (CertificateEntity certificate : certificates) {
             String json = publicApiClient.fetchScheduleList(
-                year,
-                certificate.getItemCode(),
-                certificate.getCertTypeCode()
+                    year,
+                    certificate.getItemCode(),
+                    certificate.getCertTypeCode()
             );
 
             // 매 시도마다 받아온 JSON 로그 출력
-            log.info("자격증 코드: {}, 종목 코드: {}, JSON 결과: {}", 
-                     certificate.getCertTypeCode(), certificate.getItemCode(), json);
+            log.info("자격증 코드: {}, 종목 코드: {}, JSON 결과: {}",
+                    certificate.getCertTypeCode(), certificate.getItemCode(), json);
 
-            if (json == null || json.isEmpty()) continue; 
+            if (json == null || json.isEmpty()) continue;
 
             try {
                 JsonNode root = objectMapper.readTree(json);

@@ -2,7 +2,6 @@ package com.example.certificate_service;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.openfeign.EnableFeignClients;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -12,7 +11,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 @SpringBootApplication
 @EnableScheduling  // 스케줄러 활성화
-@EnableFeignClients
 public class Certificate_ServiceApplication {
 
     public static void main(String[] args) {

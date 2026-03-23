@@ -33,6 +33,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         return -1;
     }
 
+    // white list 관리 안함
+    // 그냥 토큰 있으면 X-user-id로 바꿔줌
     @Override
     @SuppressWarnings("unchecked")
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
