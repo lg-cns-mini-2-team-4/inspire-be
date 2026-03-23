@@ -5,8 +5,7 @@ metadata:
   namespace: lgcns
 
 spec:
-  revisionsHistoryLimit: 3
-
+  revisionHistoryLimit: 3
   replicas: 1
   selector:
     matchLabels:
@@ -19,7 +18,7 @@ spec:
     spec:
       containers:
         - name: certificate
-          image: None # ECR 경로
+          image: 613307913976.dkr.ecr.ap-northeast-2.amazonaws.com/certificate  # ECR 경로
 
           ports:
           - containerPort: 8080
@@ -33,12 +32,16 @@ spec:
               memory: "256Mi"
 
           env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+
+            
             - name: DB_HOST
               valueFrom:
                 secretKeyRef:
                   name: certificate-db-secret
                   key: DB_HOST
-            - name: DB_ADMIN
+            - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: certificate-db-secret
@@ -48,6 +51,8 @@ spec:
                 secretKeyRef:
                   name: certificate-db-secret
                   key: DB_PASSWORD
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:mariadb://$(DB_HOST):3306/certificate?useSSL=true&verifyServerCertificate=false"
 
 ---
 
@@ -62,5 +67,3 @@ spec:
   ports:
     - port: 80
       targetPort: 8080
-  selector:
-    app: certificate

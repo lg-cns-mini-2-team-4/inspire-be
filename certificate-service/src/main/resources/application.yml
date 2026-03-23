@@ -7,32 +7,31 @@ spring:
   application:
     name: certificate-service # 이름
 
+  # 환경변수가 들어오면 그걸 쓰고, 없으면 local을 쓰도록 변경
   profiles:
-    active: local
+    active: ${SPRING_PROFILES_ACTIVE:local}
+
   # mariadb settings
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://localhost:3306/inspire?useSSL=true&verifyServerCertificate=false
-    username: ${spring.datasource.username}
-    password: ${spring.datasource.password}
-    # url: jdbc:mariadb://${DB_HOST}:3306/inspire?useSSL=true&verifyServerCertificate=false
-    # username: ${DB_ADMIN}
-    # password: ${DB_PASSWORD}
+    # localhost 대신 환경변수 처리. (로컬 실행 시엔 localhost 적용됨)
+    url: jdbc:mariadb://${DB_HOST:localhost}:3306/inspire?useSSL=true&verifyServerCertificate=false
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:123456789}
 
   jpa:
     database: mysql
     database-platform: org.hibernate.dialect.MariaDBDialect
     hibernate: 
-      ddl-auto: create
+      ddl-auto: update  # create로 변경 주의
     show-sql: true
     properties:
       hibernate:
         format_sql: true # 쿼리를 보기 좋게 줄바꿈하여 출력
 
   kafka:
-    kafka-server: localhost:9092
-    # # pod 실행 중인 service 이름으로 변경 (localhost X)
-    # kafka-server: kafka-service:9092
+    # 카프카 주소도 환경변수 처리 (나중에 EKS에 올릴 때 kafka-service로 주입)
+    kafka-server: ${KAFKA_HOST:localhost}:9092
 
 # # Feign + CircuitBreaker 트랜젝션 처리
 feign:
@@ -46,15 +45,9 @@ resilience4j:
         failure-rate-threshold: 40
         wait-duration-in-open-state: 10s
 
-# api 
-# api:
-#   qnet:
-#     service-key: ${QNET_SERVICE_KEY:0082b26b195ea6d25a6849f63297b1d56c8d31219c11e2de36acf1f0ee12796f}
-#     certificate-url: https://openapi.q-net.or.kr/api/service/rest/InquiryListNationalQualifcationSVC/getList
-#     schedule-url: https://apis.data.go.kr/B490007/qualExamSchd/getQualExamSchdList
 api:
   qnet:
-    service-key: "080898119fe0e5ab80852b1bca728dbbbf71d52f1299f581a1c8730fe076b7fc"
-#    service-key: "0082b26b195ea6d25a6849f63297b1d56c8d31219c11e2de36acf1f0ee12796f"
+    # 보안상 API 키도 환경변수로 빼두는 것이 정석
+    service-key: ${QNET_SERVICE_KEY:080898119fe0e5ab80852b1bca728dbbbf71d52f1299f581a1c8730fe076b7fc}
     certificate-url: http://openapi.q-net.or.kr/api/service/rest/InquiryListNationalQualifcationSVC/getList
     schedule-url: http://apis.data.go.kr/B490007/qualExamSchd/getQualExamSchdList
