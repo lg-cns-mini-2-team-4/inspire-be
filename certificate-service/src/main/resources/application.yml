@@ -1,0 +1,60 @@
+# eks 배포 시 apigateway는 eureka server에 등록하지 않겠다, 라는 의미
+eureka:
+  client:
+    enabled: false
+
+spring:
+  application:
+    name: certificate-service # 이름
+
+  profiles:
+    active: local
+  # mariadb settings
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://localhost:3306/inspire?useSSL=true&verifyServerCertificate=false
+    username: root
+    password: 123456789
+    # url: jdbc:mariadb://${DB_HOST}:3306/inspire?useSSL=true&verifyServerCertificate=false
+    # username: ${DB_ADMIN}
+    # password: ${DB_PASSWORD}
+
+  jpa:
+    database: mysql
+    database-platform: org.hibernate.dialect.MariaDBDialect
+    hibernate: 
+      ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true # 쿼리를 보기 좋게 줄바꿈하여 출력
+
+  kafka:
+    kafka-server: localhost:9092
+    # # pod 실행 중인 service 이름으로 변경 (localhost X)
+    # kafka-server: kafka-service:9092
+
+# # Feign + CircuitBreaker 트랜젝션 처리
+feign:
+  circuitbreaker:
+    enabled: true
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      productService:
+        failure-rate-threshold: 40
+        wait-duration-in-open-state: 10s
+
+# api 
+# api:
+#   qnet:
+#     service-key: ${QNET_SERVICE_KEY:0082b26b195ea6d25a6849f63297b1d56c8d31219c11e2de36acf1f0ee12796f}
+#     certificate-url: https://openapi.q-net.or.kr/api/service/rest/InquiryListNationalQualifcationSVC/getList
+#     schedule-url: https://apis.data.go.kr/B490007/qualExamSchd/getQualExamSchdList
+api:
+  qnet:
+    service-key: "080898119fe0e5ab80852b1bca728dbbbf71d52f1299f581a1c8730fe076b7fc"
+#    service-key: "0082b26b195ea6d25a6849f63297b1d56c8d31219c11e2de36acf1f0ee12796f"
+    certificate-url: http://openapi.q-net.or.kr/api/service/rest/InquiryListNationalQualifcationSVC/getList
+    schedule-url: http://apis.data.go.kr/B490007/qualExamSchd/getQualExamSchdList
