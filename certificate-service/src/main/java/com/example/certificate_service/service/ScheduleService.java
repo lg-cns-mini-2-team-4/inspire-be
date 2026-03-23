@@ -20,73 +20,105 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ScheduleService {
-private final ScheduleRepository scheduleRepository;
+    private final ScheduleRepository scheduleRepository;
 
-    // [기능 1] 접수 중인 시험 3개 조회
+    // 1. 현재 접수 중인 시험 3개 조회
     @Transactional(readOnly = true)
     public List<ScheduleActiveResponseDTO> getActiveSchedules() {
-        // K8S 파드(Pod)의 UTC 타임존 설정을 대비하여 명시적으로 서울 시간 객체 생성
         LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
-        
-        // 3개의 데이터만 제한적으로 가져오기 위해 PageRequest 생성
         Pageable limitThree = PageRequest.of(0, 3);
-        
+
         List<ScheduleEntity> schedules = scheduleRepository.findActiveSchedules(today, limitThree);
 
-        // Entity -> DTO 매핑하여 반환
         return schedules.stream().map(schedule -> {
             CertificateEntity cert = schedule.getCertificate();
             return ScheduleActiveResponseDTO.builder()
                     .itemCode(cert.getItemCode())
                     .itemName(cert.getItemName())
                     .largeFieldName(cert.getLargeFieldName())
+                    .mediumFieldName(cert.getMediumFieldName())
                     .writtenRegStart(schedule.getWrittenRegStart())
                     .writtenRegEnd(schedule.getWrittenRegEnd())
                     .writtenExamStart(schedule.getWrittenExamStart())
                     .writtenExamEnd(schedule.getWrittenExamEnd())
+                    .writtenPassDate(schedule.getWrittenPassDate())
                     .practicalRegStart(schedule.getPracticalRegStart())
                     .practicalRegEnd(schedule.getPracticalRegEnd())
                     .practicalExamStart(schedule.getPracticalExamStart())
                     .practicalExamEnd(schedule.getPracticalExamEnd())
+                    .practicalPassDate(schedule.getPracticalPassDate())
                     .description(schedule.getDescription())
-                    .examLocation(schedule.getExamLocation())
+                    // .officeName(schedule.getOfficeName())
+                    // .examLocation(schedule.getExamLocation())
                     .build();
         }).collect(Collectors.toList());
     }
 
-    // [기능 2] 다가오는 시험 3개 조회
+    // 2.. 다가오는 시험 3개 조회
     @Transactional(readOnly = true)
     public List<ScheduleActiveResponseDTO> getUpcomingSchedules() {
-        // KST 타임존 적용
         LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
-        
-        // 3개 제한
         Pageable limitThree = PageRequest.of(0, 3);
-        
-        // Repository 호출 (가장 가까운 미래 일정 3개)
+
         List<ScheduleEntity> schedules = scheduleRepository.findUpcomingSchedules(today, limitThree);
 
-        // 기존에 만들어둔 DTO 재사용하여 반환
         return schedules.stream().map(schedule -> {
             CertificateEntity cert = schedule.getCertificate();
             return ScheduleActiveResponseDTO.builder()
                     .itemCode(cert.getItemCode())
                     .itemName(cert.getItemName())
                     .largeFieldName(cert.getLargeFieldName())
+                    .mediumFieldName(cert.getMediumFieldName())
                     .writtenRegStart(schedule.getWrittenRegStart())
                     .writtenRegEnd(schedule.getWrittenRegEnd())
                     .writtenExamStart(schedule.getWrittenExamStart())
                     .writtenExamEnd(schedule.getWrittenExamEnd())
+                    .writtenPassDate(schedule.getWrittenPassDate())
                     .practicalRegStart(schedule.getPracticalRegStart())
                     .practicalRegEnd(schedule.getPracticalRegEnd())
                     .practicalExamStart(schedule.getPracticalExamStart())
                     .practicalExamEnd(schedule.getPracticalExamEnd())
+                    .practicalPassDate(schedule.getPracticalPassDate())
                     .description(schedule.getDescription())
-                    .officeName(schedule.getOfficeName())
-                    .examLocation(schedule.getExamLocation())
+                    // .officeName(schedule.getOfficeName())
+                    // .examLocation(schedule.getExamLocation())
                     .build();
         }).collect(Collectors.toList());
     }
+
+    // 3. 대시보드 상태별 시험 개수 조회
+    @Transactional(readOnly = true)
+    public ScheduleStatusCountResponseDTO getScheduleStatusCounts() {
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
+        long totalCount = scheduleRepository.count();
+        long upcomingCount = scheduleRepository.countUpcomingSchedules(today);
+        long activeCount = scheduleRepository.countActiveSchedules(today);
+        long completedCount = scheduleRepository.countCompletedSchedules(today);
+        return ScheduleStatusCountResponseDTO.builder()
+                .totalCount(totalCount)
+                .upcomingCount(upcomingCount)
+                .activeCount(activeCount)
+                .completedCount(completedCount)
+                .build();
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // [기능 3 수정] 특정 연도의 캘린더용 시험 일정 조회
     // [기능 3] 접수 중인 시험 '전체' 조회
@@ -138,43 +170,22 @@ private final ScheduleRepository scheduleRepository;
                     .itemCode(cert.getItemCode())
                     .itemName(cert.getItemName())
                     .largeFieldName(cert.getLargeFieldName())
+                    .mediumFieldName(cert.getMediumFieldName())
                     .writtenRegStart(schedule.getWrittenRegStart())
                     .writtenRegEnd(schedule.getWrittenRegEnd())
                     .writtenExamStart(schedule.getWrittenExamStart())
                     .writtenExamEnd(schedule.getWrittenExamEnd())
                     .writtenPassDate(schedule.getWrittenPassDate())
+                    .practicalRegStart(schedule.getPracticalRegStart())
+                    .practicalRegEnd(schedule.getPracticalRegEnd())
                     .practicalExamStart(schedule.getPracticalExamStart())
                     .practicalExamEnd(schedule.getPracticalExamEnd())
+                    .practicalPassDate(schedule.getPracticalPassDate())
+                    .description(schedule.getDescription())
                     .build();
         }).collect(Collectors.toList());
     }
 
-// [기능 4] 홈 화면 대시보드용 상태별 시험 개수 조회
-    @Transactional(readOnly = true)
-    public ScheduleStatusCountResponseDTO getScheduleStatusCounts() {
-        // KST 타임존 기준 현재 날짜
-        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
-
-        // 1. 전체 시험 (JpaRepository 기본 제공 메서드 활용)
-        long totalCount = scheduleRepository.count();
-        
-        // 2. 예정된 시험
-        long upcomingCount = scheduleRepository.countUpcomingSchedules(today);
-        
-        // 3. 접수 중인 시험
-        long activeCount = scheduleRepository.countActiveSchedules(today);
-        
-        // 4. 완료된 시험
-        long completedCount = scheduleRepository.countCompletedSchedules(today);
-
-        // DTO 조립 후 반환
-        return ScheduleStatusCountResponseDTO.builder()
-                .totalCount(totalCount)
-                .upcomingCount(upcomingCount)
-                .activeCount(activeCount)
-                .completedCount(completedCount)
-                .build();
-    }
     /**
     * Entity를 ScheduleActiveResponseDTO로 변환하는 공통 빌더 로직
     */
@@ -185,17 +196,20 @@ private final ScheduleRepository scheduleRepository;
                 .itemCode(cert.getItemCode())
                 .itemName(cert.getItemName())
                 .largeFieldName(cert.getLargeFieldName())
+                .mediumFieldName(cert.getMediumFieldName())
                 .writtenRegStart(schedule.getWrittenRegStart())
                 .writtenRegEnd(schedule.getWrittenRegEnd())
                 .writtenExamStart(schedule.getWrittenExamStart())
                 .writtenExamEnd(schedule.getWrittenExamEnd())
+                .writtenPassDate(schedule.getWrittenPassDate())
                 .practicalRegStart(schedule.getPracticalRegStart())
                 .practicalRegEnd(schedule.getPracticalRegEnd())
                 .practicalExamStart(schedule.getPracticalExamStart())
                 .practicalExamEnd(schedule.getPracticalExamEnd())
+                .practicalPassDate(schedule.getPracticalPassDate())
                 .description(schedule.getDescription())
-                .officeName(schedule.getOfficeName())
-                .examLocation(schedule.getExamLocation())
+                // .officeName(schedule.getOfficeName())
+                // .examLocation(schedule.getExamLocation())
                 .build();
     }
 }
