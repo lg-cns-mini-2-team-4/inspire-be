@@ -10,13 +10,17 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/certificate-service")
+@RequestMapping("/certs")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*") // 모든 프론트엔드 요청 허용 (필요에 따라 특정 도메인으로 제한 가능)
 public class MainController {
 
     private final CertificateService certificateService;
     private final ScheduleService scheduleService;
+
+    // GET /cert/active
+    // GET /cert?status=active
+    // GET /cert?status=upcoming
 
     /* Home */
     // 1. 현재 접수 중인 시험 조회
