@@ -29,5 +29,5 @@ public interface AuthApiSpecification {
     ResponseEntity<TokenResponse> reissue(HttpServletResponse res, @CookieValue(name = "inspire_refresh") String refreshToken);
 
     @Operation(summary = "임시 oauth 회원가입", description = "테스트용")
-    ResponseEntity<Void> tempOAuth2Signup(HttpServletResponse res, @CookieValue(name = "inspire_onetime") String oneTimeToken);
+    ResponseEntity<TokenResponse> tempOAuth2Signup(HttpServletResponse res, @CookieValue(name = "inspire_onetime") String oneTimeToken);
 }
