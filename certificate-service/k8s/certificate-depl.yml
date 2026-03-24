@@ -39,17 +39,17 @@ spec:
             - name: DB_HOST
               valueFrom:
                 secretKeyRef:
-                  name: certificate-db-secret
+                  name: common-db-secret
                   key: DB_HOST
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: certificate-db-secret
+                  name: common-db-secret
                   key: DB_ADMIN
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: certificate-db-secret
+                  name: common-db-secret
                   key: DB_PASSWORD
             - name: SPRING_DATASOURCE_URL
               value: "jdbc:mariadb://$(DB_HOST):3306/certificate?useSSL=true&verifyServerCertificate=false"
