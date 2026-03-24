@@ -1,0 +1,35 @@
+server:
+  port: 12321
+
+spring:
+  config:
+    activate:
+      on-profile: "local"
+
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:test;MODE=MariaDB;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password:
+    hikari:
+      maximum-pool-size: 10
+      connection-timeout: 10000
+      pool-name: hikari_primary_pool
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    defer-datasource-initialization: true
+
+  sql:
+    init:
+      mode: embedded
+
+  h2:
+    console:
+      enabled: true
+
+app:
+  user:
+    url: "http://localhost:12322"

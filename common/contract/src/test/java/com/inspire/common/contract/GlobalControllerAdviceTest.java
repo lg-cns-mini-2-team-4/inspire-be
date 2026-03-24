@@ -1,6 +1,7 @@
 package com.inspire.common.contract;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -127,8 +128,10 @@ public class GlobalControllerAdviceTest {
 
     @Test
     void testValidation() throws Exception {
-        String json = "[{\"message\": \"\"}, {\"message\": \"string2\"}, {\"message\": \"string3\"}]";
+
+        String json = "[{\"message\": \"\"}, {\"message\": \"\"}, {\"message\": \"\"}]";
         String urlencoded = "message=";
+
         mockMvc.perform(get("/validation1")
                         .header("Accept-Language", "ko")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -139,6 +142,12 @@ public class GlobalControllerAdviceTest {
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .header("Accept-Language", "ko")
                         .content(urlencoded))
+                .andDo(print());
+
+        mockMvc.perform(get("/validation3/123?my=ye")
+                        .cookie(new Cookie("test", "10"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("[]"))
                 .andDo(print());
     }
 

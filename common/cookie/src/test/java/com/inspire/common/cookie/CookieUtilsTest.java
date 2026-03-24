@@ -30,7 +30,7 @@ public class CookieUtilsTest {
 
     @BeforeEach
     void setUp() {
-        utils = new CookieUtils(true, "Lax");
+        utils = new CookieUtils("example.com", true, "Lax");
     }
 
     @Test
@@ -65,7 +65,7 @@ public class CookieUtilsTest {
     @DisplayName("addCookie adds a Set-Cookie header to the response")
     void addCookieShouldAddHeader() {
         // when
-        utils.addCookie(response, "sessionId", "abc123", "example.com", "/", 3600, true);
+        utils.addCookie(response, "sessionId", "abc123", "/", 3600, true);
 
         // then
         verify(response).addHeader(eq("Set-Cookie"), contains("sessionId=abc123"));

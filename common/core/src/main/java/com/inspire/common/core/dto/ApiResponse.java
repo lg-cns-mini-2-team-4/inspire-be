@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -60,8 +61,8 @@ public class ApiResponse<T> {
      * @param status
      * @param data
      * @param timestamp
-     * @return
      * @param <T>
+     * @return
      */
     public static <T> ApiResponse<T> ofSuccess(int status, T data, LocalDateTime timestamp) {
         return new ApiResponse<>(true, status, data, null, timestamp);
@@ -71,8 +72,8 @@ public class ApiResponse<T> {
      *
      * @param status
      * @param data
-     * @return
      * @param <T>
+     * @return
      */
     public static <T> ApiResponse<T> ofSuccess(int status, T data) {
         return new ApiResponse<>(true, status, data, null, null);
@@ -82,8 +83,8 @@ public class ApiResponse<T> {
      *
      * @param data
      * @param timestamp
-     * @return
      * @param <T>
+     * @return
      */
     public static <T> ApiResponse<T> ofSuccess(T data, LocalDateTime timestamp) {
         return new ApiResponse<>(true, 200, data, null, timestamp);
@@ -92,8 +93,8 @@ public class ApiResponse<T> {
     /**
      *
      * @param data
-     * @return
      * @param <T>
+     * @return
      */
     public static <T> ApiResponse<T> ofSuccess(T data) {
         return new ApiResponse<>(true, 200, data, null, null);
@@ -104,8 +105,8 @@ public class ApiResponse<T> {
      * @param status
      * @param error
      * @param timestamp
-     * @return
      * @param <T>
+     * @return
      */
     public static <T> ApiResponse<T> ofError(int status, ErrorResponse error, LocalDateTime timestamp) {
         return new ApiResponse<>(false, status, null, error, timestamp);
@@ -115,8 +116,8 @@ public class ApiResponse<T> {
      *
      * @param status
      * @param error
-     * @return
      * @param <T>
+     * @return
      */
     public static <T> ApiResponse<T> ofError(int status, ErrorResponse error) {
         return new ApiResponse<>(false, status, null, error, null);
@@ -128,8 +129,8 @@ public class ApiResponse<T> {
      * @param code
      * @param message
      * @param timestamp
-     * @return
      * @param <T>
+     * @return
      */
     public static <T> ApiResponse<T> ofError(int status, String code, String message, LocalDateTime timestamp) {
         return new ApiResponse<>(false, status, null, ErrorResponse.of(code, message), timestamp);
@@ -140,36 +141,29 @@ public class ApiResponse<T> {
      * @param status
      * @param code
      * @param message
-     * @return
      * @param <T>
+     * @return
      */
     public static <T> ApiResponse<T> ofError(int status, String code, String message) {
         return new ApiResponse<>(false, status, null, ErrorResponse.of(code, message), null);
     }
 
-    public static <T> ApiResponse<T> ofError(int status, String code, List<String> messages, LocalDateTime timestamp) {
-        return new ApiResponse<>(false, status, null, ErrorResponse.of(code, messages), timestamp);
+    public static <T> ApiResponse<T> ofError(int status, String code, String message, List<ValidException> details, LocalDateTime timestamp) {
+        return new ApiResponse<>(false, status, null, ErrorResponse.of(code, message, details), timestamp);
     }
 
-    /**
-     *
-     * @param status
-     * @param code
-     * @param messages
-     * @return
-     * @param <T>
-     */
-    public static <T> ApiResponse<T> ofError(int status, String code, List<String> messages) {
-        return new ApiResponse<>(false, status, null, ErrorResponse.of(code, messages), null);
+    public static <T> ApiResponse<T> ofError(int status, String code, String message, List<ValidException> details) {
+        return new ApiResponse<>(false, status, null, ErrorResponse.of(code, message, details), null);
     }
 
-    /**
-     *
-     * @param errorCode
-     * @param timestamp
-     * @return
-     * @param <T>
-     */
+    public static <T> ApiResponse<T> ofError(int status, String code, List<ValidException> details, LocalDateTime timestamp) {
+        return new ApiResponse<>(false, status, null, ErrorResponse.of(code, details), timestamp);
+    }
+
+    public static <T> ApiResponse<T> ofError(int status, String code, List<ValidException> details) {
+        return new ApiResponse<>(false, status, null, ErrorResponse.of(code, details), null);
+    }
+
     public static <T> ApiResponse<T> ofError(ErrorCode errorCode, LocalDateTime timestamp) {
         int status = errorCode.getStatus();
         String code = errorCode.getCode();
@@ -177,15 +171,10 @@ public class ApiResponse<T> {
         return new ApiResponse<>(false, status, null, ErrorResponse.of(code, message), timestamp);
     }
 
-    /**
-     *
-     * @param errorCode
-     * @return
-     * @param <T>
-     */
     public static <T> ApiResponse<T> ofError(ErrorCode errorCode) {
         int status = errorCode.getStatus();
-        String code = errorCode.getCode();;
+        String code = errorCode.getCode();
+        ;
         String message = errorCode.getMessage();
         return new ApiResponse<>(false, status, null, ErrorResponse.of(code, message), null);
     }

@@ -11,7 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * Manages the secure flag and same-site policy of cookies.
  *
  * <hr>
- *
+ * <p>
  * 쿠키 관련 설정 정보를 담는 프로퍼티 클래스.
  *
  * <p>
@@ -26,6 +26,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Slf4j
 @ConfigurationProperties(prefix = "cookie")
 public class CookieProperties {
+
+    private final String domain;
     /**
      * Secure flag. <hr>
      * Secure 플래그.
@@ -38,7 +40,7 @@ public class CookieProperties {
      * This must be one of {@code Strict}, {@code Lax}, or {@code None}, case-insensitively, or {@code null}.
      *
      * <hr>
-     *
+     * <p>
      * SameSite 속성값.
      *
      * <p>
@@ -51,23 +53,28 @@ public class CookieProperties {
      * Constructs a new {@code CookieProperties} instance with the provided secure and sameSite values.
      *
      * <hr>
-     *
+     * <p>
      * 지정된 secure과 sameSite 값을 기반으로 {@code CookieProperties} 인스턴스를 생성합니다.
      *
      * <hr>
      *
-     * @param secure    the Secure flag
-     * @param sameSite  the SameSite attribute value
+     * @param secure   the Secure flag
+     * @param sameSite the SameSite attribute value
      */
-    public CookieProperties(Boolean secure, String sameSite) {
+    public CookieProperties(String domain, Boolean secure, String sameSite) {
+        this.domain = domain;
         this.secure = secure;
         this.sameSite = sameSite;
-        log.debug("CookieProperties initialized with (secure: {}, sameSite: {})", secure, sameSite);
+        log.debug("CookieProperties initialized with (domain: {}, secure: {}, sameSite: {})", domain, secure, sameSite);
+    }
+
+    public String getDomain() {
+        return this.domain;
     }
 
     /**
      * Returns the Secure flag. <hr>
-     *
+     * <p>
      * Secure 플래그를 반환합니다. <hr>
      *
      * @return the Secure flag
@@ -79,7 +86,7 @@ public class CookieProperties {
 
     /**
      * Returns the SameSite attribute value. <hr>
-     *
+     * <p>
      * SameSite 속성값을 반환합니다. <hr>
      *
      * @return the SameSite attribute value
@@ -87,4 +94,5 @@ public class CookieProperties {
     public String getSameSite() {
         return this.sameSite;
     }
+
 }
