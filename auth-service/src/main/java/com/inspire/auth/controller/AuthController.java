@@ -11,13 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.inspire.auth.domain.dto.request.LoginRequest;
 import com.inspire.auth.domain.dto.request.SignupRequest;
-import com.inspire.auth.exception.AuthErrorCode;
-import com.inspire.auth.exception.AuthException;
 import com.inspire.common.cookie.servlet.CookieUtils;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-
-import java.net.URI;
 
 @RestController
 @RequestMapping("/auth")
@@ -79,9 +75,10 @@ public class AuthController implements AuthApiSpecification {
 
     // 임시 -> 나중엔 회원가입 따로 시킴
     @PostMapping("/oauth/signup")
-    public ResponseEntity<Void> tempOAuth2Signup(HttpServletResponse res, @CookieValue(name = "inspire_onetime") String oneTimeToken) {
-        authService.tempOAuth2Signup(oneTimeToken);
+    public ResponseEntity<TokenResponse> tempOAuth2Signup(HttpServletResponse res, @CookieValue(name = "inspire_onetime") String oneTimeToken) {
+        TokenResult tokenResult = authService.tempOAuth2Signup(oneTimeToken);
         cookieUtils.deleteCookie(res, "inspire_onetime", "/");
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        cookieUtils.addCookie(res, COOKIE_NAME, tokenResult.getRefreshToken(), "/", refreshExpires, true);
+        return ResponseEntity.ok(new TokenResponse(tokenResult.getAccessToken(), accessExpires));
     }
 }
