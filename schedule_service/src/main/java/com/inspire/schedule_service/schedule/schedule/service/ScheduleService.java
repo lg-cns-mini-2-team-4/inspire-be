@@ -34,9 +34,11 @@ public class ScheduleService {
 
     // 2. schedule 조회
     @Transactional
-    public List<ScheduleResponseDTO> getMySchedules(Long userId, LocalDate startDate, LocalDate endDate) {
+    public List<ScheduleResponseDTO> getMySchedules(Long userId, String type, LocalDate startDate, LocalDate endDate) {
         Specification<ScheduleEntity> spec = Specification
-                .where(ScheduleSpecification.betweenDate(startDate, endDate));
+                .where(ScheduleSpecification.withUserId(userId))
+                .and(ScheduleSpecification.hasType(type))
+                .and(ScheduleSpecification.betweenDate(startDate, endDate));
         List<ScheduleEntity> entities = scheduleRepository.findAll(spec);
 
         return entities.stream()

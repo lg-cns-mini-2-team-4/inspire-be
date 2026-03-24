@@ -1,0 +1,1 @@
+INSERT INTO users(id, name, phone, email) VALUES (1, '엄우성', '010-7777-9613', 'INSPIRE');

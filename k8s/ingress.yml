@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: inspire-ingress
+  namespace: lgcns
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+
+spec:
+  ingressClassName: nginx # 설치하신 ingress-nginx를 사용하도록 지정
+  rules:
+  - host: server.rymph.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: apigateway-service # 게이트웨이 서비스 이름과 반드시 일치
+            port:
+              number: 80 # 게이트웨이 서비스의 포트

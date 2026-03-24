@@ -1,5 +1,5 @@
 server:
-  port: 12321
+  port: 12323
 
 spring:
   config:
@@ -29,3 +29,8 @@ spring:
   h2:
     console:
       enabled: true
+logging:
+  level:
+    com:
+      inspire:
+        schedule_service: info

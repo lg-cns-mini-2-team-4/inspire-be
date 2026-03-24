@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth-deployment
+  name: apigateway-deployment
   namespace: lgcns
 
 spec:
@@ -9,16 +9,16 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: auth
+      app: apigateway
 
   template:
     metadata:
       labels:
-        app: auth
+        app: apigateway
     spec:
       containers:
-        - name: auth
-          image: 613307913976.dkr.ecr.ap-northeast-2.amazonaws.com/auth:latest  # ECR 경로
+        - name: apigateway
+          image: 613307913976.dkr.ecr.ap-northeast-2.amazonaws.com/apigateway:latest  # ECR 경로
 
           ports:
           - containerPort: 8080
@@ -34,21 +34,7 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "prod"
-            
-            # --- User 서비스 연결 (중요!) ---
-            - name: USER_URL_BASE
-              value: "http://user-service:80"
-              
-            - name: APP_USER_URL # 👈 이 줄을 추가하세요!
-              value: "user-service:80"
 
-            
-            
-            # --- Redis (필요시 수정) ---
-            - name: REDIS_HOST
-              value: "redis-service" # Redis 서비스 이름에 맞게 수정하세요
-            - name: SPRING_PROFILES_ACTIVE
-              value: "prod"
             
             - name: DB_HOST
               valueFrom:
@@ -67,18 +53,18 @@ spec:
                   key: DB_PASSWORD
 
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:mariadb://$(DB_HOST):3306/auth?useSSL=true&verifyServerCertificate=false"
+              value: "jdbc:mariadb://$(DB_HOST):3306/apigateway?useSSL=true&verifyServerCertificate=false"
 
 ---
 
 apiVersion: v1
 kind: Service
 metadata:
-  name: auth-service
+  name: apigateway-service
   namespace: lgcns
 spec:
   selector:
-    app: auth
+    app: apigateway
   ports:
     - port: 80
       targetPort: 8080

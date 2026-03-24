@@ -84,7 +84,6 @@
 //     runtimeOnly 'com.h2database:h2'
 //     runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
 // }
-
 plugins {
     // 💡 팀원이 도입한 공통 컨벤션 플러그인 유지
     id 'spring-web-conventions'

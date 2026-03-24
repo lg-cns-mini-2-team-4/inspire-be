@@ -3,6 +3,7 @@ package com.inspire.schedule_service.schedule.schedule.ctrl;
 import java.time.LocalDate;
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import com.inspire.schedule_service.schedule.schedule.service.ScheduleService;
 
 import lombok.RequiredArgsConstructor;
 
+@Slf4j
 @RestController
 @RequestMapping("/schedules")
 @RequiredArgsConstructor
@@ -31,10 +33,12 @@ public class ScheduleController {
 
     // 3. 전체 일정 목록 조회 (달력용)
     @GetMapping("")
-    public ResponseEntity<List<ScheduleResponseDTO>> list(@RequestParam(name = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+    public ResponseEntity<List<ScheduleResponseDTO>> list(@RequestParam(name = "type", required = false) String type,
+                                                          @RequestParam(name = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
                                                           @RequestParam(name = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
                                                           @RequestHeader(value = "X-User-Id") Long userId) {
-        List<ScheduleResponseDTO> list = scheduleService.getMySchedules(userId, startDate, endDate);
+        log.info("user: {}, type: {}, startDate: {}, endDate: {}", userId, type, startDate, endDate);
+        List<ScheduleResponseDTO> list = scheduleService.getMySchedules(userId, type, startDate, endDate);
         return ResponseEntity.ok(list);
     }
 

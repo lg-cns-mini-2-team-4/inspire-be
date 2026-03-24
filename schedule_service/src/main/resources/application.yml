@@ -7,6 +7,12 @@ spring:
 
   profiles:
     default: local
+    
+  datasource:
+    url: jdbc:mariadb://${DB_HOST}:3306/schedule?useSsl=false # DB 이름 확인 필수
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.mariadb.jdbc.Driver
 
 management:
   endpoints:
