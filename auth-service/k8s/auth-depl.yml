@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-deployment
+  namespace: lgcns
+
+spec:
+  revisionHistoryLimit: 3
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth
+
+  template:
+    metadata:
+      labels:
+        app: auth
+    spec:
+      containers:
+        - name: auth
+          image: 613307913976.dkr.ecr.ap-northeast-2.amazonaws.com/auth:latest  # ECR 경로
+
+          ports:
+          - containerPort: 8080
+          
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+
+            
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: common-db-secret
+                  key: DB_HOST
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: common-db-secret
+                  key: DB_ADMIN
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: common-db-secret
+                  key: DB_PASSWORD
+
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:mariadb://$(DB_HOST):3306/auth?useSSL=true&verifyServerCertificate=false"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service
+  namespace: lgcns
+spec:
+  selector:
+    app: auth
+  ports:
+    - port: 80
+      targetPort: 8080
