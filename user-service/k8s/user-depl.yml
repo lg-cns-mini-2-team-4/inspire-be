@@ -36,24 +36,24 @@ spec:
               value: "prod"
 
             
-            - name: DB_HOST
+            - name: DATABASE_HOST
               valueFrom:
                 secretKeyRef:
                   name: common-db-secret
                   key: DB_HOST
-            - name: DB_USERNAME
+            - name: DATABASE_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: common-db-secret
                   key: DB_ADMIN
-            - name: DB_PASSWORD
+            - name: DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: common-db-secret
                   key: DB_PASSWORD
 
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:mariadb://$(DB_HOST):3306/user?useSSL=true&verifyServerCertificate=false"
+              value: "jdbc:mariadb://$(DATABASE_HOST):3306/user?useSSL=true&verifyServerCertificate=false"
 
 ---
 

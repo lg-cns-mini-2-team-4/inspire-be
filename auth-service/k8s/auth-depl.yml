@@ -42,7 +42,7 @@ spec:
             - name: APP_USER_URL # 👈 이 줄을 추가하세요!
               value: "user-service:80"
 
-            
+           
             
             # --- Redis (필요시 수정) ---
             - name: REDIS_HOST
@@ -50,24 +50,30 @@ spec:
             - name: SPRING_PROFILES_ACTIVE
               value: "prod"
             
-            - name: DB_HOST
+            - name: DATABASE_HOST
               valueFrom:
                 secretKeyRef:
                   name: common-db-secret
                   key: DB_HOST
-            - name: DB_USERNAME
+            - name: DATABASE_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: common-db-secret
                   key: DB_ADMIN
-            - name: DB_PASSWORD
+            - name: DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: common-db-secret
                   key: DB_PASSWORD
 
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:mariadb://$(DB_HOST):3306/auth?useSSL=true&verifyServerCertificate=false"
+              value: "jdbc:mariadb://$(DATABASE_HOST):3306/auth?useSSL=true&verifyServerCertificate=false"
+            
+            # --- 추가 확인 ---
+            - name: SPRING_DATASOURCE_USERNAME # 스프링 부트 표준 변수명도 같이 넣어주면 더 안전합니다.
+              value: "$(DATABASE_USERNAME)"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "$(DATABASE_PASSWORD)"
 
 ---
 

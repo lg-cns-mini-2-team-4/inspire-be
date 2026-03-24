@@ -44,32 +44,56 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+//     @Bean
+//     @Profile("!local")
+//     public SecurityFilterChain filterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource) throws Exception {
+//         http
+//                 .sessionManagement(session -> session
+//                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//                 .cors(CorsConfigurer::disable)
+//                 .csrf(CsrfConfigurer::disable)
+//                 .authorizeHttpRequests(auth -> auth
+//                         .anyRequest().permitAll())
+//                 .httpBasic(HttpBasicConfigurer::disable)
+//                 .formLogin(FormLoginConfigurer::disable)
+//                 .oauth2Login(oauth -> oauth
+//                         .authorizationEndpoint(auth -> auth
+//                                 .baseUri("/oauth2/authorization")
+//                                 .authorizationRequestRepository(redisAuthorizationRequestRepository)
+//                         )
+//                         .redirectionEndpoint(redirect -> redirect
+//                                 .baseUri("/oauth2/code/*")
+//                         )
+//                         .userInfoEndpoint(userInfo -> userInfo
+//                                 .userService(oAuth2UserService)
+//                         )
+//                         .successHandler(oAuth2AuthenticationSuccessHandler)
+//                         .failureHandler(oAuth2AuthenticationFailureHandler)
+//                 );
+//         return http.build();
+//     }
+
+
     @Bean
     @Profile("!local")
-    public SecurityFilterChain filterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .cors(CorsConfigurer::disable)
-                .csrf(CsrfConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll())
-                .httpBasic(HttpBasicConfigurer::disable)
-                .formLogin(FormLoginConfigurer::disable)
-                .oauth2Login(oauth -> oauth
-                        .authorizationEndpoint(auth -> auth
-                                .baseUri("/oauth2/authorization")
-                                .authorizationRequestRepository(redisAuthorizationRequestRepository)
-                        )
-                        .redirectionEndpoint(redirect -> redirect
-                                .baseUri("/oauth2/code/*")
-                        )
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(oAuth2UserService)
-                        )
-                        .successHandler(oAuth2AuthenticationSuccessHandler)
-                        .failureHandler(oAuth2AuthenticationFailureHandler)
-                );
+            // 1. 세션 사용 안 함
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            // 2. CORS/CSRF 일단 끄기
+            .cors(AbstractHttpConfigurer::disable)
+            .csrf(AbstractHttpConfigurer::disable)
+            // 3. 모든 요청을 무조건 허용 (이게 핵심)
+            .authorizeHttpRequests(auth -> auth
+                .anyRequest().permitAll()
+            )
+            // 4. 나머지 보안 기능들 명시적으로 끄기
+            .httpBasic(AbstractHttpConfigurer::disable)
+            .formLogin(AbstractHttpConfigurer::disable)
+            .logout(AbstractHttpConfigurer::disable);
+            // .oauth2Login(...) 부분은 잠시 주석 처리하거나 지워보세요.
+
         return http.build();
     }
 
