@@ -71,16 +71,6 @@ public class AuthController implements AuthApiSpecification {
         return ResponseEntity.ok(new TokenResponse(tokenResult.getAccessToken(), accessExpires));
     }
 
-    @ExceptionHandler(AuthException.class)
-    public ResponseEntity<Void> handleAuthException(AuthException e) {
-        if (e.getErrorCode() == AuthErrorCode.USER_NOT_FOUND || e.getErrorCode() == AuthErrorCode.INVALID_PASSWORD) {
-            return ResponseEntity.status(HttpStatus.SEE_OTHER)
-                    .location(URI.create("/login?error"))
-                    .build();
-        }
-        return ResponseEntity.status(e.getErrorCode().getStatus()).build();
-    }
-
     // Keep test endpoints below
     @GetMapping("/test")
     public String test() {

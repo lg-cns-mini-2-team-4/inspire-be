@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: certificate
-          image: None # ECR 경로
+          image: 613307913976.dkr.ecr.ap-northeast-2.amazonaws.com/certificate:latest
 
           ports:
           - containerPort: 8080

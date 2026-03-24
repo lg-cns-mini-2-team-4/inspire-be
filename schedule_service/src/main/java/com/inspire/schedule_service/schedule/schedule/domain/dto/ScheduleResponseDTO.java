@@ -17,28 +17,23 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ScheduleResponseDTO {
+    private Long id;
     private String title;
     private LocalDate date;
     private EventType type;
     private String description;
+    private Long userId;
+    private String refId;
 
-    // 시험 등록 필드
-    private String itemName;
-    private LocalDate writtenRegStart;
-    private LocalDate writtenRegEnd;
-    private LocalDate writtenExamStart;
-    private LocalDate writtenPassDate;
-    private LocalDate practicalRegStart;
-    private LocalDate practicalRegEnd;
-    private LocalDate practicalExamStart;
-    private LocalDate practicalPassDate;
-
-    public static ScheduleResponseDTO fromEntity(ScheduleEntity entity){
+    public static ScheduleResponseDTO fromEntity(ScheduleEntity entity) {
         return ScheduleResponseDTO.builder()
-                                    .title(entity.getTitle())
-                                    .date(entity.getDate())
-                                    .type(entity.getType())
-                                    .description(entity.getDescription())
-                                    .build();
+                .id(entity.getId())
+                .title(entity.getTitle())
+                .date(entity.getDate())
+                .type(entity.getType())
+                .description(entity.getDescription())
+                .userId(entity.getUserId())
+                .refId(entity.getRefId())
+                .build();
     }
 }

@@ -17,18 +17,20 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ScheduleRequestDTO {
+    private Long userId;
     private String title;
     private LocalDate date;
     private EventType type;
     private String description;
+    private Long refId;
 
-    public ScheduleEntity toEntity(Long user){
+    public ScheduleEntity toEntity(Long userId){
         return ScheduleEntity.builder()
                             .title(this.title)
                             .date(this.date)
                             .type(this.type)
                             .description(this.description)
-                            .user(user)
+                            .userId(userId)
                             .build();
     }
 }

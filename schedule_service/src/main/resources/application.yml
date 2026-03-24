@@ -1,28 +1,18 @@
 server:
-  port: 8888
-  
+  port: 8080
+
 spring:
+  application:
+    name: schedule-service
 
-  # mariadb settings
-  datasource:
-    driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://${DB_HOST}:3306/practice 
-    username: ${DB_ADMIN}
-    password: ${DB_PASSWORD}
-  
-  jpa:
-    hibernate: 
-      # create, create-drop, update, none
-      ddl-auto:  create
-      # 콘솔출력
-    show-sql: true     
-    properties:
-      hibernate:
-        # h2
-        # dialect: org.hibernate.dialect.H2Dialect
-        # mariadb
-        dialect: org.hibernate.dialect.MariaDBDialect
-        format_sql: true 
+  profiles:
+    default: local
 
-jwt:
-  secret: ${JWT_SECRET}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      show-details: always
