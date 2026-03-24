@@ -20,7 +20,7 @@ public class ScheduleResponseDTO {
     private Long id;
     private String title;
     private LocalDate date;
-    private EventType type;
+    private String type;
     private String description;
     private Long userId;
     private String refId;
@@ -30,7 +30,7 @@ public class ScheduleResponseDTO {
                 .id(entity.getId())
                 .title(entity.getTitle())
                 .date(entity.getDate())
-                .type(entity.getType())
+                .type(entity.getType().name())
                 .description(entity.getDescription())
                 .userId(entity.getUserId())
                 .refId(entity.getRefId())

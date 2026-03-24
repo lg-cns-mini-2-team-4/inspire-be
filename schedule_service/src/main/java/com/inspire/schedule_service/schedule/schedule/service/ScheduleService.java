@@ -56,10 +56,11 @@ public class ScheduleService {
 
     // 4. 일정 삭제
     @Transactional
-    public void delete(Long scheduleId, Long user) {
+    public ScheduleResponseDTO delete(Long scheduleId, Long user) {
         System.out.println(">>>> Schedule service delete");
         ScheduleEntity schedule = scheduleRepository.findByIdAndUserId(scheduleId, user)
                 .orElseThrow(() -> new EntityNotFoundException("권한이 없거나 일정 없음"));
         scheduleRepository.delete(schedule);
+        return ScheduleResponseDTO.fromEntity(schedule);
     }
 }

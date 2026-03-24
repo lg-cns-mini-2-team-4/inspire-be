@@ -3,6 +3,7 @@ package com.inspire.schedule_service.schedule.schedule.ctrl;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,11 +31,16 @@ public class ScheduleController {
 
     // 3. 전체 일정 목록 조회 (달력용)
     @GetMapping("")
-    public ResponseEntity<List<ScheduleResponseDTO>> list(@RequestParam(name = "startDate", required = false) LocalDate startDate,
-                                                          @RequestParam(name = "endDate", required = false) LocalDate endDate,
+    public ResponseEntity<List<ScheduleResponseDTO>> list(@RequestParam(name = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+                                                          @RequestParam(name = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
                                                           @RequestHeader(value = "X-User-Id") Long userId) {
         List<ScheduleResponseDTO> list = scheduleService.getMySchedules(userId, startDate, endDate);
         return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/favorites")
+    public ResponseEntity<List<ScheduleResponseDTO>> list2(@RequestHeader(name = "X-User-Id") Long userId) {
+        return null;
     }
 
     // 4. 일정 상세 읽기
@@ -47,9 +53,9 @@ public class ScheduleController {
 
     // 6. 일정 삭제
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable("id") Long id,
-                                       @RequestHeader("X-User-Id") Long userId) {
-        scheduleService.delete(id, userId);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<ScheduleResponseDTO> delete(@PathVariable("id") Long id,
+                                                      @RequestHeader("X-User-Id") Long userId) {
+        ScheduleResponseDTO response = scheduleService.delete(id, userId);
+        return ResponseEntity.ok(response);
     }
 }
