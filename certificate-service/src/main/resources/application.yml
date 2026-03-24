@@ -8,6 +8,19 @@ spring:
   profiles:
     default: local
 
+  # hajihyeok setting
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://localhost:3306/inspire?useSSL=true&verifyServerCertificate=false
+    username: root
+    password: 123456789
+  jpa:
+    database: mysql
+    database-platform: org.hibernate.dialect.MariaDBDialect
+    hibernate: 
+      ddl-auto: create
+    show-sql: true
+
 management:
   endpoints:
     web:
@@ -20,15 +33,10 @@ management:
 logging:
   level:
     root: debug
-# api 
-# api:
-#   qnet:
-#     service-key: ${QNET_SERVICE_KEY:0082b26b195ea6d25a6849f63297b1d56c8d31219c11e2de36acf1f0ee12796f}
-#     certificate-url: https://openapi.q-net.or.kr/api/service/rest/InquiryListNationalQualifcationSVC/getList
-#     schedule-url: https://apis.data.go.kr/B490007/qualExamSchd/getQualExamSchdList
+
 api:
   qnet:
     service-key: "080898119fe0e5ab80852b1bca728dbbbf71d52f1299f581a1c8730fe076b7fc"
-#    service-key: "0082b26b195ea6d25a6849f63297b1d56c8d31219c11e2de36acf1f0ee12796f"
+    # service-key: "0082b26b195ea6d25a6849f63297b1d56c8d31219c11e2de36acf1f0ee12796f"
     certificate-url: http://openapi.q-net.or.kr/api/service/rest/InquiryListNationalQualifcationSVC/getList
     schedule-url: http://apis.data.go.kr/B490007/qualExamSchd/getQualExamSchdList

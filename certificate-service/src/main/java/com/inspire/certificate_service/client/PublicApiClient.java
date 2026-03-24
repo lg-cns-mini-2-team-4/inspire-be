@@ -37,21 +37,21 @@ public class PublicApiClient {
     }
 
     // 시험 일정 JSON 가져오기 (연도별)
-public String fetchScheduleList(String year, String itemCode, String qualgbCd) {
-    try {
-        return webClient.get()
-                .uri(scheduleUrl + "?serviceKey=" + serviceKey
-                        + "&implYy=" + year
-                        + "&jmCd=" + itemCode
-                        + "&qualgbCd=" + qualgbCd
-                        + "&dataFormat=json"
-                        + "&numOfRows=10&pageNo=1")
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
-    } catch (Exception e) {
-        log.error("시험일정 API 호출 실패 ({}년 {}): {}", year, itemCode, e.getMessage());
-        return null;
-}
-}
+    public String fetchScheduleList(String year, String itemCode, String qualgbCd) {
+        try {
+            return webClient.get()
+                    .uri(scheduleUrl + "?serviceKey=" + serviceKey
+                            + "&implYy=" + year
+                            + "&jmCd=" + itemCode
+                            + "&qualgbCd=" + qualgbCd
+                            + "&dataFormat=json"
+                            + "&numOfRows=10&pageNo=1")
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+        } catch (Exception e) {
+            log.error("시험일정 API 호출 실패 ({}년 {}): {}", year, itemCode, e.getMessage());
+            return null;
+        }
+    }
 }

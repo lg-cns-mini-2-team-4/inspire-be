@@ -6,14 +6,22 @@ import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
-import java.util.Set;
 
 public class ExamSpecification {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static Specification<ExamEntity> withCertificate(String itemName, String fieldCode) {
         return (root, query, cb) -> {
-            Join<ExamEntity, CertificateEntity> cert = (Join) root.fetch("certificate", JoinType.LEFT);
+
+            boolean isCountQuery = query.getResultType().equals(Long.class);
+
+            Join<ExamEntity, CertificateEntity> cert;
+            if (isCountQuery) {
+                cert = root.join("certificate", JoinType.LEFT);
+            } else {
+                cert = (Join) root.fetch("certificate", JoinType.LEFT);
+            }
+
             assert query != null;
             query.distinct(true);
 
@@ -32,22 +40,7 @@ public class ExamSpecification {
             return predicate;
         };
     }
-//
-//    // 2. 종목명 검색 (Partial Match)
-//    public static Specification<ExamEntity> hasItemName(String itemName) {
-//        return (root, query, cb) -> {
-//            if (itemName == null || itemName.isEmpty()) return null;
-//            return cb.like(root.join("certificate").get("itemName"), "%" + itemName + "%");
-//        };
-//    }
-//
-//    // 3. 대직무분야 필터링
-//    public static Specification<ExamEntity> hasLargeField(String fieldCode) {
-//        return (root, query, cb) -> {
-//            if (fieldCode == null || fieldCode.isEmpty()) return null;
-//            return cb.equal(root.join("certificate").get("largeFieldCode"), fieldCode);
-//        };
-//    }
+
 
     // 4. 상태 필터링 (접수중 / 접수예정)
     public static Specification<ExamEntity> hasStatus(String status, LocalDate currentDate) {
@@ -90,6 +83,28 @@ public class ExamSpecification {
     public static Specification<ExamEntity> upcomingPredicate(LocalDate currentDate) {
         return (root, query, cb) -> cb.greaterThan(root.get("startDate"), currentDate);
     }
+
+}
+
+
+//
+//    // 2. 종목명 검색 (Partial Match)
+//    public static Specification<ExamEntity> hasItemName(String itemName) {
+//        return (root, query, cb) -> {
+//            if (itemName == null || itemName.isEmpty()) return null;
+//            return cb.like(root.join("certificate").get("itemName"), "%" + itemName + "%");
+//        };
+//    }
+//
+//    // 3. 대직무분야 필터링
+//    public static Specification<ExamEntity> hasLargeField(String fieldCode) {
+//        return (root, query, cb) -> {
+//            if (fieldCode == null || fieldCode.isEmpty()) return null;
+//            return cb.equal(root.join("certificate").get("largeFieldCode"), fieldCode);
+//        };
+//    }
+
+
 //
 //    /**
 //     * 5. 특정 기간(startDate ~ endDate) 내에 진행되는 시험 필터링
@@ -106,4 +121,3 @@ public class ExamSpecification {
 //            );
 //        };
 //    }
-}

@@ -10,7 +10,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 @SpringBootApplication
-// @EnableScheduling  // 스케줄러 활성화
+@EnableScheduling  // 스케줄러 활성화
 public class Certificate_ServiceApplication {
 
     public static void main(String[] args) {

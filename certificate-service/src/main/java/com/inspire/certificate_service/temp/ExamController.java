@@ -1,4 +1,4 @@
-// // package com.example.certificate_service.ctrl;
+//package com.inspire.certificate_service.temp;
 
 // // import com.example.certificate_service.domain.dto.CertificateDetailResponseDTO;
 // // import com.example.certificate_service.service.CertificateService;

@@ -1,4 +1,4 @@
-// package com.example.certificate_service.ctrl;
+// package com.inspire.certificate_service.temp;
 
 // import com.example.certificate_service.domain.dto.ScheduleActiveResponseDTO;
 // import com.example.certificate_service.domain.dto.ScheduleCalendarResponseDTO;
