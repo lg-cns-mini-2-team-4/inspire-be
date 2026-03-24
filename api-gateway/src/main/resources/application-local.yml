@@ -1,0 +1,7 @@
+server:
+  port: 12321
+
+spring:
+  config:
+    activate:
+      on-profile: "local"

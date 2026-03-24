@@ -101,7 +101,7 @@ dependencies {
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
 
-    // --- [경훈 님의 certificate-service 필수 기능 복구!] ---
+    // --- [certificate-service 필수 기능 복구!] ---
     // 공공API 호출 및 XML 파싱용
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'

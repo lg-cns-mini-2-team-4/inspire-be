@@ -81,8 +81,5 @@ app:
       registration: ${FRONTEND_URL_REGISTRATION:http://localhost:5173/oauth-register}
       login-success: ${FRONTEND_URL_LOGIN_SUCCESS:http://localhost:5173/login-success}
       login-failure: ${FRONTEND_URL_LOGIN_FAILURE:http://localhost:5173/login-failure}
-
-
-logging:
-  level:
-    root: debug
+  user:
+    url: ${USER_URL_BASE:http://localhost:12322}

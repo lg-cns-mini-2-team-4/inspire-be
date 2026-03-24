@@ -1,11 +1,9 @@
-# eks 배포 시 apigateway는 eureka server에 등록하지 않겠다, 라는 의미
-eureka:
-  client:
-    enabled: false
+server:
+  port: 8080
 
 spring:
   application:
-    name: certificate-service # 이름
+    name: certificate-service
 
   # 환경변수가 들어오면 그걸 쓰고, 없으면 local을 쓰도록 변경
   profiles:
@@ -25,18 +23,24 @@ spring:
     hibernate: 
       ddl-auto: update  # create로 변경 주의
     show-sql: true
-    properties:
-      hibernate:
-        format_sql: true # 쿼리를 보기 좋게 줄바꿈하여 출력
 
   kafka:
     # 카프카 주소도 환경변수 처리 (나중에 EKS에 올릴 때 kafka-service로 주입)
     kafka-server: ${KAFKA_HOST:localhost}:9092
 
-# # Feign + CircuitBreaker 트랜젝션 처리
-feign:
-  circuitbreaker:
-    enabled: true
+# 모니터링(Actuator) 설정
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    root: debug
 
 resilience4j:
   circuitbreaker:
@@ -49,5 +53,6 @@ api:
   qnet:
     # 보안상 API 키도 환경변수로 빼두는 것이 정석
     service-key: ${QNET_SERVICE_KEY:080898119fe0e5ab80852b1bca728dbbbf71d52f1299f581a1c8730fe076b7fc}
+    # service-key: "0082b26b195ea6d25a6849f63297b1d56c8d31219c11e2de36acf1f0ee12796f"
     certificate-url: http://openapi.q-net.or.kr/api/service/rest/InquiryListNationalQualifcationSVC/getList
     schedule-url: http://apis.data.go.kr/B490007/qualExamSchd/getQualExamSchdList

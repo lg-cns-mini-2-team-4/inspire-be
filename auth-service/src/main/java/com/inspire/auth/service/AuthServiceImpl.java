@@ -135,7 +135,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public void tempOAuth2Signup(String onetimeToken) {
+    public TokenResult tempOAuth2Signup(String onetimeToken) {
         OAuth2UserVO vo = oneTimeTokenService.tempGetOAuth2VO(onetimeToken)
                 .orElseThrow(() -> new AuthException(AuthErrorCode.ONETIME_NOT_IN_REDIS));
 
@@ -157,6 +157,14 @@ public class AuthServiceImpl implements AuthService {
         } catch (FeignException e) {
             throw new AuthException(AuthErrorCode.FEIGN_CLIENT_ERROR);
         }
+
+        Long userId = user.getUserId();
+        String accessToken = jwtUtils.createAccessToken(userId, List.of("ROLE_USER"));
+        String refreshToken = jwtUtils.createRefreshToken(userId);
+
+        redisStore.save(userId, refreshToken, Duration.ofSeconds(jwtUtils.getRefreshExpiresInSeconds()));
+
+        return new TokenResult(accessToken, refreshToken);
     }
 }
 

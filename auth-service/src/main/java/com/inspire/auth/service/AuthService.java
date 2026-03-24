@@ -16,5 +16,5 @@ public interface AuthService {
     TokenResult login(LoginRequest request);
     TokenResult reissue(String refreshToken);
     void logout(HttpServletResponse res, Long userId, String refreshToken);
-    void tempOAuth2Signup(String onetimeToken);
+    TokenResult tempOAuth2Signup(String onetimeToken);
 }

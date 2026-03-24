@@ -1,0 +1,9 @@
+plugins {
+    id 'spring-cloud-conventions'
+}
+
+dependencies {
+    implementation project(':common:jwt')
+    //implementation libs.springcloud.openfeign
+    implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
+}
