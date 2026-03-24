@@ -66,5 +66,6 @@ public class ScheduleService {
     public void deleteAllByFavorite(Long userId, String itemCode) {
         scheduleRepository.deleteByUserIdAndRefId(userId, itemCode);
     }
+
 }
 
