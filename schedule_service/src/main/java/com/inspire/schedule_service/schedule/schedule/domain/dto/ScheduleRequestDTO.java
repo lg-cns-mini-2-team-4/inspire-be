@@ -16,19 +16,23 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+// schedule DB에 저장을 위한 DTO
 public class ScheduleRequestDTO {
     private String title;
+    private String description;
     private LocalDate date;
     private EventType type;
-    private String description;
+    private Long userId; 
+    private String examId;
 
-    public ScheduleEntity toEntity(Long user){
+    public ScheduleEntity toEntity(Long userId) {
         return ScheduleEntity.builder()
                             .title(this.title)
+                            .description(this.description)
                             .date(this.date)
                             .type(this.type)
-                            .description(this.description)
-                            .user(user)
+                            .userId(userId)
+                            .refId(this.examId)
                             .build();
     }
 }

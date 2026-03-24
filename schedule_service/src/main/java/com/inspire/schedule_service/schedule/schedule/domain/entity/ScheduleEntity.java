@@ -4,6 +4,8 @@ import java.time.LocalDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -25,23 +27,22 @@ public class ScheduleEntity {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
 
-    private String title;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
-    private LocalDate date;
+    @Column(nullable = false)
+    private String title;
     
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private EventType type;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
 
-    // user가 event 등록하는 것에 대한 관계
-    @Column (nullable = false)
-    private Long user;
+    @Column(nullable = false)
+    private LocalDate date;
 
-    public void update(String title, LocalDate date, EventType type, String description) {
-        this.title = title;
-        this.date = date;
-        this.type = type;
-        this.description = description;
-    }
-
+    @Column(name = "ref_id")
+    private String refId;
 }

@@ -16,29 +16,23 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+// 개인 일정 list에서 반환되는 데이터
 public class ScheduleResponseDTO {
+    private Long id;
     private String title;
+    private String description;
     private LocalDate date;
     private EventType type;
-    private String description;
+    private String refId;
 
-    // 시험 등록 필드
-    private String itemName;
-    private LocalDate writtenRegStart;
-    private LocalDate writtenRegEnd;
-    private LocalDate writtenExamStart;
-    private LocalDate writtenPassDate;
-    private LocalDate practicalRegStart;
-    private LocalDate practicalRegEnd;
-    private LocalDate practicalExamStart;
-    private LocalDate practicalPassDate;
-
-    public static ScheduleResponseDTO fromEntity(ScheduleEntity entity){
+    public static ScheduleResponseDTO fromEntity(ScheduleEntity entity) {
         return ScheduleResponseDTO.builder()
-                                    .title(entity.getTitle())
-                                    .date(entity.getDate())
-                                    .type(entity.getType())
-                                    .description(entity.getDescription())
-                                    .build();
+                .id(entity.getId())
+                .title(entity.getTitle())
+                .description(entity.getDescription())
+                .date(entity.getDate())
+                .type(entity.getType())
+                .refId(entity.getRefId())
+                .build();
     }
 }
