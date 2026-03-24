@@ -14,7 +14,7 @@ import lombok.*;
 
 
 @Entity
-@Table(name="Schedules")
+@Table(name="schedules")
 @Builder
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

@@ -2,9 +2,11 @@ server:
   port: 8080
 
 spring:
-
   application:
     name: api-gateway
+
+  profiles:
+    default: local
 
   cloud:
     gateway:
@@ -14,10 +16,18 @@ spring:
         cors-configurations:
           '[/**]':
             allowedOrigins:
-              - 'http://localhost:3000'
-            allowedMethods: '*'
-            allowedHeaders: '*'
-            exposedHeaders: '*'
+              - ${FRONTEND_URL_BASE:http://localhost:5173}
+            allowedMethods:
+              - OPTIONS
+              - HEAD
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - PATCH
+            allowedHeaders:
+              - 'Content-Type'
+              - 'Authorization'
             allowCredentials: true
 
       # eureka server 에 등록된 client 찾아서 사용자의 url_pattern을 매핑하는 작업
@@ -59,9 +69,3 @@ jwt:
   refresh:
     secret: ${JWT_REFRESH_SECRET:inspire-mini-project-team-4-refresh-secret-key}
     expires: ${JWT_REFRESH_EXPIRES:1209600000}
-
-# must be modified since we do NOT use eureka.
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:8761/eureka/

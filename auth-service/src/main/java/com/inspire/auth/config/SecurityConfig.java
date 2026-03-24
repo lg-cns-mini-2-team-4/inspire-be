@@ -6,16 +6,13 @@ import com.inspire.auth.security.oauth.RedisAuthorizationRequestRepository;
 import com.inspire.auth.security.service.InspireOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.config.annotation.web.configurers.*;
 import org.springframework.security.oauth2.client.jackson2.OAuth2ClientJackson2Module;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
-import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -48,32 +45,31 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(List.of(frontend));
-        config.setAllowedMethods(List.of("OPTIONS", "HEAD", "GET", "POST", "PUT", "DELETE", "PATCH"));
-        config.setAllowedHeaders(List.of("Content-Type", "Authorization"));
-        config.setAllowCredentials(true);
-        config.setExposedHeaders(List.of("Authorization"));
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-
-        return source;
-    }
-
-    @Bean
     @Profile("!local")
     public SecurityFilterChain filterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource) throws Exception {
         http
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .cors(cors -> cors
-                        .configurationSource(corsConfigurationSource()))
+                .cors(CorsConfigurer::disable)
                 .csrf(CsrfConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/actuator/**", "/h2-console/**", "/swagger-ui/**", "/v3/api-docs/**")
-                        .permitAll());
+                        .anyRequest().permitAll())
+                .httpBasic(HttpBasicConfigurer::disable)
+                .formLogin(FormLoginConfigurer::disable)
+                .oauth2Login(oauth -> oauth
+                        .authorizationEndpoint(auth -> auth
+                                .baseUri("/oauth2/authorization")
+                                .authorizationRequestRepository(redisAuthorizationRequestRepository)
+                        )
+                        .redirectionEndpoint(redirect -> redirect
+                                .baseUri("/oauth2/code/*")
+                        )
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(oAuth2UserService)
+                        )
+                        .successHandler(oAuth2AuthenticationSuccessHandler)
+                        .failureHandler(oAuth2AuthenticationFailureHandler)
+                );
         return http.build();
     }
 
@@ -83,8 +79,7 @@ public class SecurityConfig {
         http
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .cors(cors -> cors
-                        .configurationSource(corsConfigurationSource()))
+                .cors(CorsConfigurer::disable)
                 .csrf(CsrfConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll())
