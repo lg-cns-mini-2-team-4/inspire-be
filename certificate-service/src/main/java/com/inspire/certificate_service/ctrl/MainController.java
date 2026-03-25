@@ -4,6 +4,7 @@ import com.inspire.certificate_service.domain.dto.ExamDetailResponseDTO;
 import com.inspire.certificate_service.domain.dto.ExamListResponseDTO;
 import com.inspire.certificate_service.domain.dto.ExamSummaryResponse;
 import com.inspire.certificate_service.service.ExamService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
@@ -22,8 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/certs")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*", allowedHeaders = "*")
-public class MainController {
+@Tag(name = "cert", description = "Certification APIs")
+public class MainController implements CertApiSpecification {
 
     private final ExamService examService;
 

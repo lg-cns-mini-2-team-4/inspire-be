@@ -16,6 +16,7 @@ jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations
 
 # Swagger Springdoc
 springdoc-swagger = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc-swagger"}
+springdoc-swagger-reactive = { module = "org.springdoc:springdoc-openapi-starter-webflux-ui", version.ref = "springdoc-swagger"}
 
 # Spring Cloud
 springcloud-openfeign = { module = "org.springframework.cloud:spring-cloud-starter-openfeign", version.ref = "springcloud-openfeign" }

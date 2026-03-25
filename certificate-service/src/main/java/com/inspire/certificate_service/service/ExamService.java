@@ -34,6 +34,7 @@ public class ExamService {
      */
     private ExamListResponseDTO toListDto(ExamEntity entity) {
         return ExamListResponseDTO.builder()
+                .id(entity.getExamId())
                 .itemCode(entity.getCertificate().getItemCode())
                 .itemName(entity.getCertificate().getItemName())
                 .largeFieldName(entity.getCertificate().getLargeFieldName())

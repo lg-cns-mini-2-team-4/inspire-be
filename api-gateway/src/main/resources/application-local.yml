@@ -9,26 +9,6 @@ spring:
 
   cloud:
     gateway:
-      # cores 처리
-      # 각 서비스 모듈은 웹브라우저와 직접 통신하지 않으므로 단일진입점인 gateway 담당
-      globalcors:
-        cors-configurations:
-          '[/**]':
-            allowedOrigins:
-              - ${FRONTEND_URL_BASE:http://localhost:5173}
-            allowedMethods:
-              - OPTIONS
-              - HEAD
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - PATCH
-            allowedHeaders:
-              - 'Content-Type'
-              - 'Authorization'
-            allowCredentials: true
-
       # eureka server 에 등록된 client 찾아서 사용자의 url_pattern을 매핑하는 작업
       routes:
         - id: auth-service
@@ -57,3 +37,9 @@ spring:
             # inner   : http://server.xxxxx.shop/product/signIn
             - StripPrefix=1
           uri: http://localhost:12323
+        - id: certificate-service
+          predicates:
+            - Path=/app/certs/**
+          filters:
+            - StripPrefix=1
+          uri: http://localhost:12324

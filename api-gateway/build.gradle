@@ -4,6 +4,6 @@ plugins {
 
 dependencies {
     implementation project(':common:jwt')
-    //implementation libs.springcloud.openfeign
+    implementation libs.springdoc.swagger.reactive
     implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
 }
