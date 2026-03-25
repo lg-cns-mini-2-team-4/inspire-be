@@ -80,15 +80,29 @@ public class AuthServiceImpl implements AuthService {
         UserCredentials user = userCredentialsRepository.findByEmailAndProvider(request.getEmail(), Provider.INSPIRE)
                 .orElseThrow(() -> new AuthException(AuthErrorCode.USER_NOT_FOUND));
 
+        log.info("유저확인 성공");
+        System.out.println("유저확인 성공");
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new AuthException(AuthErrorCode.INVALID_PASSWORD);
         }
 
+        log.info("패스워드 확인 성공");
+        System.out.println("패스워드 확인 성공");
+
         String accessToken = jwtUtils.createAccessToken(user.getUserId(), List.of("ROLE_USER"));
+
+        log.info("access 생성 성공");
+        System.out.println("access 생성 성공");
         String refreshToken = jwtUtils.createRefreshToken(user.getUserId());
+
+        log.info("refresh 생성 성공");
+        System.out.println("refresh 생성 성공");
 
         // Default TTL for refresh token to 14 days
         redisStore.save(user.getUserId(), refreshToken, Duration.ofSeconds(jwtUtils.getRefreshExpiresInSeconds()));
+
+        log.info("redis 저장 성공");
+        System.out.println("redis 저장 성공");
 
         return new TokenResult(accessToken, refreshToken);
     }

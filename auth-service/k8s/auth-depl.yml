@@ -35,7 +35,9 @@ spec:
             - name: SPRING_PROFILES_ACTIVE
               value: "prod"
 
-            
+            - name : LOGGING_LEVEL_ROOT
+              value: "DEBUG"
+
             - name: DB_HOST
               valueFrom:
                 secretKeyRef:

@@ -28,6 +28,8 @@ spring:
             allowedHeaders:
               - 'Content-Type'
               - 'Authorization'
+              - 'X-User-Id'
+              - 'X-User-Roles'
             allowCredentials: true
 
       # eureka server 에 등록된 client 찾아서 사용자의 url_pattern을 매핑하는 작업
